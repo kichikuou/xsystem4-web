@@ -50,12 +50,8 @@ export function addToast(msg: string | Node, type: 'success' | 'warning' | 'erro
     return card;
 }
 
-export function isMobileSafari(from?: string, to?: string): boolean {
-    let match = navigator.userAgent.match(/OS ([0-9_]+) like Mac OS X\)/);
-    if (!match)
-        return false;
-    let ver = match[1].replace(/_/g, '.');
-    return (!from || from <= ver) && (!to || ver < to);
+export function isAppleDevice(): boolean {
+    return navigator.userAgent.includes('Mac OS X');
 }
 
 export function basename(path: string): string {

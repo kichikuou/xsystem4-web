@@ -1,5 +1,5 @@
 import type { XSys4Module } from './xsystem4.js';
-import { $, addToast, basename, isMobileSafari } from './utils.js';
+import { $, addToast, basename, isAppleDevice } from './utils.js';
 import { AssetManager } from './asset_manager.js';
 import { Audio } from './audio.js';
 import { HllValidator } from './hll_validator.js';
@@ -28,7 +28,7 @@ async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
         m.addRunDependency('create_xsystem4');
         preRun(m).then(() => m.removeRunDependency('create_xsystem4'));
     });
-    if (isMobileSafari()) {
+    if (isAppleDevice()) {
         // Workaround for https://bugs.webkit.org/show_bug.cgi?id=255103
         module.wasmMemory = new WebAssembly.Memory({
             initial:  64 * 1024 * 1024 / 65536,
