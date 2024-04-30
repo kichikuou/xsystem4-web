@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="lib/pico.min.css">
+    <link rel="stylesheet" href="index.css">
+    <title>XSystem4 Webインストーラ</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ER5NLGNC86"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      if (location.host.startsWith('localhost:')) {
+        gtag('config', 'G-ER5NLGNC86', { debug_mode:true });
+      } else {
+        gtag('config', 'G-ER5NLGNC86');
+      }
+    </script>
+  </head>
+  <body>
+    <header id="navbar" data-theme="dark">
+      <div class="container">
+        <nav>
+          <ul>
+            <li><strong>XSystem4 Webインストーラ</strong></li>
+          </ul>
+          <ul id="loader-toolbar">
+            <li><a href="https://twitter.com/KichikuouWeb" target="_blank">
+              <!-- https://tabler.io/icons/icon/brand-x -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-x">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+                <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+              </svg>
+            </a></li>
+            <li><a href="https://github.com/kichikuou/xsystem4-web" target="_blank">
+              <!-- https://tabler.io/icons/icon/brand-github -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-brand-github">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+              </svg>
+            </a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="container">
+      <div id="introduction">
+        <p>アリスソフトの『戦国ランス』等のゲームを iPhone / iPad のホーム画面にインストールするためのWebアプリです。</p>
+      </div>
+
+      <div id="installer">
+        <section>
+          <h3>インストール方法</h3>
+          <ol>
+            <li>PC上で、ゲームデータのあるフォルダー（例: <code>C:\AliceSoft\戦国ランス</code>）をZIP形式で圧縮します。</li>
+            <li>圧縮したZIPファイルを、iPhone / iPad に転送します。iCloudなどのクラウドストレージを使うといいでしょう。</li>
+            <li>iPhone / iPad の Safari でこのページを開いて、下の「ファイルを選択」ボタンを押します。</li>
+            <li>転送したZIPファイルを選択します。あとは画面の指示に従ってインストールしてください。</li>
+          </ol>
+          <input type="file" id="file-picker"/>
+        </section>
+
+        <section>
+          <h3>動作確認済みゲーム</h3>
+          <ul>
+            <li>大番長 -Big Bang Age-</li>
+            <li>Rance VI -ゼス崩壊-</li>
+            <li>ウルトラ魔法少女まなな</li>
+            <li>鈴宮刑務娼館</li>
+            <li>しまいま。</li>
+            <li>GALZOOアイランド</li>
+            <li>よくばりサボテン</li>
+            <li>戦国ランス</li>
+            <li>戦国ランス～三匹が斬ったり突いたり燃やしたり</li>
+            <li>闘神都市III</li>
+            <li>はるうられ -校内赤線区域-</li>
+            <li>わいどにょ</li>
+            <li>ランス02 -反逆の少女たち-</li>
+            <li>戦国ランスMOD ルドラサウム大陸版</li>
+            <li>戦国ランスMOD 大戦国ランス</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>操作方法</h3>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">タッチ操作</th>
+                <th scope="col">対応する動作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>タップ</td>
+                <td>クリック</td>
+              </tr>
+              <tr>
+                <td>ゲーム画面外の黒い部分をタップ</td>
+                <td>右クリック</td>
+              </tr>
+              <tr>
+                <td>画面長押し</td>
+                <td>Ctrlキー</td>
+              </tr>
+              <tr>
+                <td>2本指上下スワイプ</td>
+                <td>ホイールスクロール</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h3>アンインストール方法</h3>
+          <p>
+            ホーム画面のアイコンを長押しして、「ブックマークを削除」を選択します。
+            これでゲームデータとセーブデータも削除されます。
+          </p>
+        </section>
+
+        <section>
+          <h3>注意事項</h3>
+          <ul>
+            <li>このWebアプリで遊べる作品の多くは成人向けです。利用の際はご注意ください。</li>
+            <li>アリスソフトとは無関係の個人による制作です。アリスソフトへの問い合わせはしないでください。</li>
+            <li>無保証です。自己責任でご利用ください。</li>
+          </ul>
+        </section>
+
+      </div>
+    </div>
+
+    <dialog id="add-to-home-screen">
+      <article>
+        <h2>ホーム画面に追加</h2>
+        <p>
+          右上の共有ボタン
+          <!-- https://tabler.io/icons/icon/share-2 -->
+          <svg id="share-button" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-share-2">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M8 9h-1a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-8a2 2 0 0 0 -2 -2h-1" />
+            <path d="M12 14v-11" />
+            <path d="M9 6l3 -3l3 3" />
+          </svg>
+          から「ホーム画面に追加」を選択して、<br />
+          ホーム画面に追加されたアイコンをタップしてください。
+        </p>
+        <p>
+          ホーム画面に追加した後は、このページは閉じることができます。
+        </p>
+      </article>
+    </dialog>
+
+    <div class="toast-container"></div>
+
+    <script type="module" src="index.js"></script>
+  </body>
+</html>

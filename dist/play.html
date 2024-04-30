@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="lib/pico.min.css">
+    <link rel="stylesheet" href="play.css">
+    <title>XSystem4 for Web</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ER5NLGNC86"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      if (location.host.startsWith('localhost:')) {
+        gtag('config', 'G-ER5NLGNC86', { debug_mode:true });
+      } else {
+        gtag('config', 'G-ER5NLGNC86');
+      }
+    </script>
+  </head>
+  <body>
+
+    <div id="xsystem4">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    </div>
+
+    <div id="spinner" aria-busy="true"></div>
+
+    <div id="mute-indicator" hidden>
+      <!-- https://tabler.io/icons/icon/volume-off -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-volume-off">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5 5 0 0 1 -.535 .464" />
+        <path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9 9 0 0 1 -.686 .615" />
+        <path d="M9.069 5.054l.431 -.554a.8 .8 0 0 1 1.5 .5v2m0 4v8a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664" />
+        <path d="M3 3l18 18" />
+      </svg>
+    </div>
+
+    <div class="toast-container"></div>
+
+    <script type="module" src="play.js"></script>
+  </body>
+</html>

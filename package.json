@@ -1,0 +1,23 @@
+{
+  "name": "xsystem4-web",
+  "version": "0.0.0",
+  "description": "XSystem4 Web Installer",
+  "repository": "github:kichikuou/xsystem4-web",
+  "type": "module",
+  "scripts": {
+    "build": "./build-wasm.sh && node build.js",
+    "serve": "node build.js --serve",
+    "watch": "node build.js --watch"
+  },
+  "author": "kichikuou <KichikuouChrome@gmail.com>",
+  "devDependencies": {
+    "@types/emscripten": "^1.39.10",
+    "esbuild": "^0.20.2"
+  },
+  "dependencies": {
+    "@picocss/pico": "^2.0.6",
+    "@types/gtag.js": "^0.0.19",
+    "binaryen": "^116.0.0",
+    "subset-font": "^2.3.0"
+  }
+}

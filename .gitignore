@@ -1,0 +1,11 @@
+build*/
+node_modules/
+dist/**/*.js
+dist/**/*.js.map
+!dist/service-worker.js
+dist/xsystem4.*
+dist/fonts/
+dist/jspi/
+dist/lib/
+.firebaserc
+.firebase/

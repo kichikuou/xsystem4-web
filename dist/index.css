@@ -1,0 +1,83 @@
+:root {
+    --pico-nav-element-spacing-vertical: 1rem;
+}
+
+header {
+    --pico-block-spacing-vertical: 0;
+    background-color: var(--pico-secondary-background);
+
+    a {
+        color: #c2c7d0;  /* var(--pico-color); */
+        &:hover {
+            color: var(--pico-primary);
+        }
+    }
+}
+
+#introduction {
+    margin: 1rem 0;
+}
+
+#game-start {
+    margin: 2rem;
+    text-align: center;
+}
+
+section {
+    margin-bottom: 2rem;
+}
+
+table {
+    width: initial;
+}
+
+#installer {
+    padding: 1rem 0;
+}
+
+#installing {
+    margin-top: 5rem;
+    text-align: center;
+}
+
+#share-button {
+    color: var(--pico-primary);
+}
+
+.toast-container {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 500;
+}
+
+.toast {
+    -webkit-animation: slide-down .2s ease 1;
+    animation: slide-down .2s ease 1;
+
+    button {
+        --pico-form-element-spacing-vertical: 0.25rem;
+        margin-inline-start: 1rem;
+    }
+}
+
+.toast-success {
+    border-left: 0.4rem solid #5cb85c;
+}
+.toast-warning {
+    border-left: 0.4rem solid #f0ad4e;
+}
+.toast-error {
+    border-left: 0.4rem solid #c52f21;
+}
+
+@keyframes slide-down {
+    0% {
+      opacity: 0;
+      transform: translateY(-2rem);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+}

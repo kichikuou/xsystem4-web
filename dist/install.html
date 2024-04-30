@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="lib/pico.min.css">
+    <link rel="stylesheet" href="index.css">
+    <title>XSystem4 Webインストーラ</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ER5NLGNC86"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      if (location.host.startsWith('localhost:')) {
+        gtag('config', 'G-ER5NLGNC86', { debug_mode:true });
+      } else {
+        gtag('config', 'G-ER5NLGNC86');
+      }
+    </script>
+  </head>
+  <body>
+    <header id="navbar" data-theme="dark">
+      <div class="container">
+        <nav>
+          <ul>
+            <li><strong>XSystem4 Webインストーラ</strong></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <div id="installer">
+        <h3>インストール</h3>
+        <section>
+          <p>『<span id="title"></span>』のZIPをもう一度選択して、インストールを完了してください。</p>
+          <input type="file" id="file-picker"/>
+        </section>
+      </div>
+
+      <div id="installing" hidden>
+        <progress id="progress" value="0"></progress>
+        <p id="message">インストール中… <span id="percentages"></span></p>
+        <p><small id="filename"></small></p>
+      </div>
+
+      <div id="game-start" hidden>
+        <a role="button" href="play.html">ゲーム開始</a>
+      </div>
+
+    </div>
+
+    <div class="toast-container"></div>
+
+    <script type="module" src="install.js"></script>
+  </body>
+</html>
