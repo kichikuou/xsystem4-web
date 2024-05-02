@@ -76,7 +76,7 @@ async function generateManifest(title: string, icon: Uint8Array | null) {
 
 registerErrorHandlers();
 
-if (!window.DecompressionStream) {
-    addToast('このブラウザでは動作しません。Safari 16.4以上が必要です。', 'error');
-    gtag('event', 'UnsupportedBrowser', { Reason: 'No DecompressionStream support' });
+if (!navigator.storage || !navigator.storage.estimate) {
+    addToast('このブラウザでは動作しません。iOS / iPadOS 17以上が必要です。', 'error');
+    gtag('event', 'UnsupportedBrowser');
 }
