@@ -204,3 +204,16 @@ export class Shell {
         this.hll_validator!.validate(lib, name, func, sig);
     }
 }
+
+// SDL resets the canvas's width and height in window.onresize, but it does
+// not work well when the screen orientation changes (in Safari).
+new ResizeObserver((entries) => {
+    for (const entry of entries) {
+        const canvas = entry.target as HTMLCanvasElement;
+        const { width, height } = entry.contentRect;
+        if (canvas.width !== width || canvas.height !== height) {
+            // Fire a resize event again to update the state in SDL.
+            window.dispatchEvent(new Event('resize'));
+        }
+    }
+}).observe($('#canvas')!);
