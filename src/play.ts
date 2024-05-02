@@ -14,6 +14,7 @@ getFilesFromOPFS().then(files => {
         location.href = './install.html' + url.hash;
     } else {
         addToast('ゲームがインストールされていません。', 'error');
+        gtag('event', 'GameNotInstalled');
         registerDropHandler();
     }
     $('#spinner').remove();

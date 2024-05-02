@@ -32,6 +32,7 @@ export async function InstallFromZip(zipFile: File) {
     } catch (e) {}
 
     const rootInZip = dirname(ini.iniPath);
+    let retryCount = 0;
     for (const file of files) {
         if (!file.name.startsWith(rootInZip + '/') || file.name.endsWith('/')) {
             progress.increase(file.uncompressedSize);
@@ -40,12 +41,17 @@ export async function InstallFromZip(zipFile: File) {
         progress.setFilename(file.name);
         const path = file.name.replace(rootInZip, `/${OPFS_GAMEDIR}`);
         // TODO: Consider extracting files in parallel.
-        try {
-            await worker.writeZipFile(path, file);
-        } catch (e) {
-            addToast(`ファイルの書き込みに失敗しました。\n${e}`, 'error');
-            gtag('event', 'InstallWorkerError', { Message: e });
-            return;
+        while (true) {
+            try {
+                await worker.writeZipFile(path, file);
+                break;
+            } catch (e) {
+                gtag('event', 'InstallWorkerError', { Message: e, RetryCount: retryCount });
+                if (++retryCount >= 3) {
+                    addToast(`ファイルの書き込みに失敗しました。\n${e}`, 'error');
+                    return;
+                };
+            }
         }
     }
 
