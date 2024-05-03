@@ -1,4 +1,10 @@
+const GPBF_ENCRYPTED = 0x0001;
+const GPBF_UTF8 = 0x0800;
 const OS_UNIX = 3;
+const METHOD_STORE = 0;
+const METHOD_DEFLATE = 8;
+const DOS_ATTR_DIRECTORY = 0x10;
+const DOS_ATTR_ARCHIVE = 0x20;
 
 export class ZipFile {
     name: string;
@@ -10,7 +16,7 @@ export class ZipFile {
     gpbf: number;
 
     isEncrypted(): boolean {
-        return (this.gpbf & 1) !== 0;
+        return (this.gpbf & GPBF_ENCRYPTED) !== 0;
     }
 
     constructor(private file: Blob, cde: Uint8Array) {
@@ -33,7 +39,7 @@ export class ZipFile {
     }
 
     guessPathEncoding(versionMadeBy: number): string {
-        if (this.gpbf & 0x800) return 'utf-8';
+        if (this.gpbf & GPBF_UTF8) return 'utf-8';
         const os = versionMadeBy >> 8;
         if (os === OS_UNIX) return 'utf-8';
         return 'shift_jis';
@@ -51,10 +57,10 @@ export class ZipFile {
 
     async extract(): Promise<Uint8Array> {
         if (this.isEncrypted()) throw new Error('Encrypted ZIP files are not supported');
-        if (this.method === 0) {
+        if (this.method === METHOD_STORE) {
             return new Uint8Array(await (await this.compressedData()).arrayBuffer());
         }
-        if (this.method !== 8) throw new Error('Unsupported compression method: ' + this.method);
+        if (this.method !== METHOD_DEFLATE) throw new Error('Unsupported compression method: ' + this.method);
         const stream = (await this.compressedData()).stream().pipeThrough(new DecompressionStream('deflate-raw'));
         const data = await new Response(stream).arrayBuffer();
         if (~crc32(new Uint8Array(data)) !== this.crc32) {
@@ -93,6 +99,79 @@ export async function load(file: Blob): Promise<ZipFile[]> {
         pos += cdeSize;
     }
     return files;
+}
+
+export class ZipBuilder {
+    private entries: Uint8Array[] = [];
+    private centralDirectory: Uint8Array[] = [];
+    private offset = 0;
+
+    addFile(path: string, data: Uint8Array, mtime: Date) {
+        const dosTime = (mtime.getSeconds() >> 1) | (mtime.getMinutes() << 5) | (mtime.getHours() << 11);
+        const dosDate = mtime.getDate() | ((mtime.getMonth() + 1) << 5) | ((mtime.getFullYear() - 1980) << 9);
+        const crc = ~crc32(data);
+        const nameIsAscii = /^[\x20-\x7E]*$/.test(path);
+        const name = new TextEncoder().encode(path);
+        const nameLength = name.byteLength;
+        const gpbf = nameIsAscii ? 0 : GPBF_UTF8;
+        const extAttr = path.endsWith('/') ? DOS_ATTR_DIRECTORY : DOS_ATTR_ARCHIVE;
+
+        const localHeader = new Uint8Array(30 + nameLength);
+        const lh = new DataView(localHeader.buffer);
+        lh.setUint32(0, 0x04034B50, true);  // "PK\003\004"
+        lh.setUint16(4, 20, true);  // version needed to extract
+        lh.setUint16(6, gpbf, true);  // GPB flag
+        lh.setUint16(8, METHOD_STORE, true);  // compression method
+        lh.setUint16(10, dosTime, true);
+        lh.setUint16(12, dosDate, true);
+        lh.setUint32(14, crc, true);
+        lh.setUint32(18, data.byteLength, true);  // compressed size
+        lh.setUint32(22, data.byteLength, true);  // uncompressed size
+        lh.setUint16(26, nameLength, true);  // file name length
+        lh.setUint16(28, 0, true);  // extra field length
+        localHeader.set(name, 30);
+        this.entries.push(localHeader, data);
+
+        const centralDirectoryEntry = new Uint8Array(46 + nameLength);
+        const cde = new DataView(centralDirectoryEntry.buffer);
+        cde.setUint32(0, 0x02014B50, true);  // "PK\001\002"
+        cde.setUint16(4, OS_UNIX << 8 | 20, true);  // version made by
+        cde.setUint16(6, 20, true);  // version needed to extract
+        cde.setUint16(8, gpbf, true);  // GPB flag
+        cde.setUint16(10, METHOD_STORE, true);  // compression method
+        cde.setUint16(12, dosTime, true);
+        cde.setUint16(14, dosDate, true);
+        cde.setUint32(16, crc, true);
+        cde.setUint32(20, data.byteLength, true);  // compressed size
+        cde.setUint32(24, data.byteLength, true);  // uncompressed size
+        cde.setUint16(28, nameLength, true);  // file name length
+        cde.setUint16(30, 0, true);  // extra field length
+        cde.setUint16(32, 0, true);  // comment length
+        cde.setUint16(34, 0, true);  // disk number start
+        cde.setUint16(36, 0, true);  // internal file attributes
+        cde.setUint32(38, extAttr, true);  // external file attributes
+        cde.setUint32(42, this.offset, true);  // local header offset
+        centralDirectoryEntry.set(name, 46);
+        this.centralDirectory.push(centralDirectoryEntry);
+
+        this.offset += localHeader.byteLength + data.byteLength;
+    }
+
+    addDir(path: string, mtime: Date) {
+        this.addFile(path + '/', new Uint8Array(0), mtime);
+    }
+
+    build(): Blob {
+        const centralDirectorySize = this.centralDirectory.reduce((sum, e) => sum + e.byteLength, 0);
+        const eocd = new Uint8Array(22);
+        const v = new DataView(eocd.buffer);
+        v.setUint32(0, 0x06054B50, true);  // "PK\005\006"
+        v.setUint16(8, this.centralDirectory.length, true);
+        v.setUint16(10, this.centralDirectory.length, true);
+        v.setUint32(12, centralDirectorySize, true);
+        v.setUint32(16, this.offset, true);
+        return new Blob([...this.entries, ...this.centralDirectory, eocd], { type: 'application/zip' });
+    }
 }
 
 const crc32Table = new Uint32Array(256);

@@ -3,6 +3,7 @@ import type { ZipFile } from './zip.js';
 export const $: (selector: string) => HTMLElement = document.querySelector.bind(document);
 
 export const OPFS_GAMEDIR = 'game';
+export const HOMEDIR = '/.xsystem4';
 
 export function registerErrorHandlers() {
     window.addEventListener('error', (evt: ErrorEvent) => {
@@ -22,6 +23,14 @@ export function registerErrorHandlers() {
             gtag('event', 'UnhandledRejection', { Name: reason.constructor.name, Reason: reason });
         }
     });
+}
+
+export function confirm(msg: string) {
+    // window.confirm() on iOS Safari pauses the audio context.
+    const result = window.confirm(msg);
+    // TODO: Make this type-safe.
+    (window as any).shell.audio.context.resume();
+    return result;
 }
 
 export function addToast(msg: string | Node, type: 'success' | 'warning' | 'error', timeout?: number): HTMLElement {

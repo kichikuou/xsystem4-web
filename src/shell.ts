@@ -1,12 +1,12 @@
 import type { XSys4Module } from './xsystem4.js';
-import { $, addToast, basename, isAppleDevice } from './utils.js';
+import { $, HOMEDIR, addToast, basename, isAppleDevice } from './utils.js';
 import { AssetManager } from './asset_manager.js';
 import { Audio } from './audio.js';
 import { HllValidator } from './hll_validator.js';
 import { InputString } from './input.js';
+import * as sysmenu from './sysmenu.js';
 
 const GAMEDIR = '/game';
-const HOMEDIR = '/.xsystem4';
 
 async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
     const module: any = {
@@ -148,6 +148,8 @@ export class Shell {
     }
 
     init_save(gameName: string, saveDir: string) {
+        sysmenu.initSaveMenu(this.m.FS, gameName);
+
         // Import save files from the user-provided game data.
         const src = `${GAMEDIR}/${saveDir}`;
         const dest = `${HOMEDIR}/${gameName}/${saveDir}`;
@@ -192,6 +194,10 @@ export class Shell {
                     console.warn(`syncfs failed: ${err}`);
             });
         }, timeout);
+    }
+
+    open_system_menu() {
+        sysmenu.open();
     }
 
     private hll_validator: HllValidator | undefined;

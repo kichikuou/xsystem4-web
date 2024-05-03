@@ -39,6 +39,23 @@
       </svg>
     </div>
 
+    <dialog id="system-menu">
+      <article>
+        <header>
+          <button id="system-menu-close" aria-label="Close" rel="prev"></button>
+          <p><strong>システムメニュー</strong></p>
+        </header>
+        <section class="grid">
+          <button id="restart-game">ゲームを再起動</button>
+        </section>
+        <h5>セーブデータ</h5>
+        <div class="grid">
+          <button id="export-save">ZIPに保存</button>
+          <button id="import-save">ZIPから復元</button>
+        </div>
+      </article>
+    </dialog>
+
     <div class="toast-container"></div>
 
     <script type="module" src="play.js"></script>
