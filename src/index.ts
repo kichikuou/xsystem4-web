@@ -77,6 +77,7 @@ async function generateManifest(title: string, icon: Uint8Array | null) {
 registerErrorHandlers();
 
 if (!navigator.storage || !navigator.storage.estimate) {
+    ($('#file-picker') as HTMLInputElement).disabled = true;
     addToast('このブラウザでは動作しません。iOS / iPadOS 17以上が必要です。', 'error');
     gtag('event', 'UnsupportedBrowser');
 }
