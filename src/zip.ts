@@ -23,7 +23,7 @@ export class ZipFile {
         if (versionNeeded > 20) throw new Error('Unsupported ZIP version: ' + versionNeeded);
         this.gpbf = v.getUint16(8, true);
         this.method = v.getUint16(10, true);
-        this.crc32 = v.getUint32(16, true);
+        this.crc32 = v.getInt32(16, true);
         this.compressedSize = v.getUint32(20, true);
         this.uncompressedSize = v.getUint32(24, true);
         const fileNameLength = v.getUint16(28, true);
@@ -57,7 +57,9 @@ export class ZipFile {
         if (this.method !== 8) throw new Error('Unsupported compression method: ' + this.method);
         const stream = (await this.compressedData()).stream().pipeThrough(new DecompressionStream('deflate-raw'));
         const data = await new Response(stream).arrayBuffer();
-        // TODO: Verify CRC32.
+        if (~crc32(new Uint8Array(data)) !== this.crc32) {
+            throw new Error('CRC32 mismatch');
+        }
         return new Uint8Array(data);
     }
 }
@@ -91,6 +93,22 @@ export async function load(file: Blob): Promise<ZipFile[]> {
         pos += cdeSize;
     }
     return files;
+}
+
+const crc32Table = new Uint32Array(256);
+for (let i = 0; i < 256; i++) {
+    let crc = i;
+    for (let j = 0; j < 8; j++) {
+        crc = (crc & 1) ? (crc >>> 1) ^ 0xEDB88320 : crc >>> 1;
+    }
+    crc32Table[i] = crc;
+}
+
+export function crc32(data: Uint8Array, crc: number = -1): number {
+    for (let i = 0; i < data.length; i++) {
+        crc = crc32Table[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+    }
+    return crc;
 }
 
 function readBytes(file: Blob, offset: number, length: number): Promise<ArrayBuffer> {

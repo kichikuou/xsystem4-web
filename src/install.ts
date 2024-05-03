@@ -123,7 +123,7 @@ class InstallerWorker {
         const data = await file.compressedData();
         return new Promise<string>(async (res, rej) => {
             this.resolvers.set(path, { resolve: res, reject: rej });
-            this.postMessage({ command: 'write', path, data, compression });
+            this.postMessage({ command: 'write', path, data, compression, crc32: file.crc32 });
         });
     }
 }

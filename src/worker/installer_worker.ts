@@ -1,8 +1,10 @@
 // A worker that writes files to OPFS.
 // This is necessary because OPFS is not writable from the main thread in Safari.
+import { crc32 } from '../zip.js';
 
-export type InstallerWorkerRequest =
-  { command: 'write', path: string, data: Blob, compression?: CompressionFormat };
+type WriteRequest = { command: 'write', path: string, data: Blob, compression?: CompressionFormat, crc32: number };
+
+export type InstallerWorkerRequest = WriteRequest;
 
 export type InstallerWorkerResponse =
     { path: string, command: 'write', error: string | null }
@@ -12,7 +14,7 @@ onmessage = async (e: MessageEvent) => {
     const req: InstallerWorkerRequest = e.data;
     try {
         if (req.command === 'write') {
-            await write(req.path, req.data, req.compression);
+            await write(req);
         } else {
             throw new Error('Unknown command: ' + req.command);
         }
@@ -22,28 +24,34 @@ onmessage = async (e: MessageEvent) => {
     }
 };
 
-async function write(path: string, data: Blob, compression?: CompressionFormat) {
-    let stream = createBlobStream(data);
-    if (compression) {
-        stream = stream.pipeThrough(new DecompressionStream(compression));
+async function write(req: WriteRequest) {
+    let stream = createBlobStream(req.data);
+    if (req.compression) {
+        stream = stream.pipeThrough(new DecompressionStream(req.compression));
     }
 
-    const file = await createFile(path);
+    const file = await createFile(req.path);
     // Since Safari doesn't support FileSystemFileHandle.createWritable(),
     // we need to use sync access to write the file.
     const handle = await file.createSyncAccessHandle();
 
     const reader = stream.getReader();
+    let crc = -1;
     // Stream is not async iterable in Safari.
     await new Promise<void>((resolve, reject) => {
         reader.read().then(function processChunk({ done, value }) {
             if (done) {
                 handle.close();
+                if (~crc !== req.crc32) {
+                    reject(new Error('CRC32 mismatch'));
+                    return;
+                }
                 resolve();
                 return;
             }
             handle.write(value);
-            postMessage({ path, command: 'progress', value: value.byteLength });
+            crc = crc32(value, crc);
+            postMessage({ path: req.path, command: 'progress', value: value.byteLength });
             reader.read().then(processChunk).catch(reject);
         }).catch(reject);
     });
