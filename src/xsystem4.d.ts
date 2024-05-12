@@ -10,6 +10,7 @@ export interface XSys4Module extends EmscriptenModule {
     removeRunDependency: typeof removeRunDependency;
     _gfx_get_window_size: () => number;
     _gfx_get_viewport: () => number;
+    _xsystem4_reset: () => void;
 }
 
 export interface XSys4Shell {

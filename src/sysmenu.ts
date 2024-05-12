@@ -8,7 +8,8 @@ $('#system-menu-close').addEventListener('click', () => dialog.close());
 $('#restart-game').addEventListener('click', () => {
     if (confirm('セーブされていないデータは失われます。\nゲームを再起動しますか？')) {
         gtag('event', 'RestartGame');
-        window.location.reload();
+        window.shell.m._xsystem4_reset();
+        dialog.close();
     }
 });
 
@@ -87,7 +88,8 @@ async function importSave(FS: XSys4Module['FS'], gameName: string) {
     await new Promise<any>((res) => FS.syncfs(false, res));
     gtag('event', 'ImportSave');
     if (confirm('セーブデータを取り込みました。\nゲームを再起動しますか？')) {
-        window.location.reload();
+        window.shell.m._xsystem4_reset();
+        dialog.close();
     }
 }
 
