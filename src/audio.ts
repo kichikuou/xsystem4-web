@@ -23,6 +23,10 @@ export class Audio {
         return this.masterGain;
     }
 
+    resumeContext() {
+        this.context.resume();
+    }
+
     private autoResumeAudioContext() {
         if (this.context.state !== 'suspended') return;
         $('#mute-indicator').hidden = false;

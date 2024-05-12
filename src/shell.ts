@@ -44,7 +44,7 @@ async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
 export type GameFile = { path: string, file: File };
 
 export class Shell {
-    private m: XSys4Module;
+    m: XSys4Module;
     private audio = new Audio();
     private nonResidentFiles = new Map<string, File>();
     assets = new AssetManager();
@@ -54,7 +54,7 @@ export class Shell {
         document.documentElement.setAttribute('data-theme', 'dark');
         create_xsystem4(async (module) => {
             this.m = module;
-            (module as any).shell = this;  // Enable C code to access this object.
+            module.shell = this;  // Enable C code to access this object.
             await Promise.all([
                 this.loadGameFiles(files),
                 this.loadFonts(),
@@ -130,6 +130,10 @@ export class Shell {
         }
         this.m.arguments.push('--font-gothic', gothic);
         this.m.arguments.push('--font-mincho', mincho);
+    }
+
+    resumeAudioContext() {
+        this.audio.resumeContext();
     }
 
     // snake_case methods are called from C code.

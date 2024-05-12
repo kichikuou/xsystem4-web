@@ -4,7 +4,7 @@ import { $, OPFS_GAMEDIR, addToast, registerErrorHandlers } from './utils.js';
 registerErrorHandlers();
 
 getFilesFromOPFS().then(files => {
-    (window as any).shell = new Shell(files);
+    window.shell = new Shell(files);
     persistStorage();
 }, () => {
     const url = new URL(location.href);
@@ -45,7 +45,7 @@ function registerDropHandler() {
         const entry = t.items[0].webkitGetAsEntry();
         if (entry?.isDirectory) {
             const files = getFilesFromDirectory(entry as FileSystemDirectoryEntry);
-            (window as any).shell = new Shell(files);
+            window.shell = new Shell(files);
         } else {
             addToast('フォルダーをドラッグ＆ドロップしてください。', 'warning');
         }

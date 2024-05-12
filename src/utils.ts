@@ -28,8 +28,7 @@ export function registerErrorHandlers() {
 export function confirm(msg: string) {
     // window.confirm() on iOS Safari pauses the audio context.
     const result = window.confirm(msg);
-    // TODO: Make this type-safe.
-    (window as any).shell.audio.context.resume();
+    window.shell.resumeAudioContext();
     return result;
 }
 

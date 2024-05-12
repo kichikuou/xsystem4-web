@@ -104,7 +104,7 @@ export class InputString {
     }
 
     private getWindowSize() {
-        const m = (window as any).shell.m as XSys4Module;
+        const m = window.shell.m;
         const size = m._gfx_get_window_size();
         const w = m.HEAP32[(size >> 2) + 0];
         const h = m.HEAP32[(size >> 2) + 1];
@@ -112,7 +112,7 @@ export class InputString {
     }
 
     private getCanvasViewport() {
-        const m = (window as any).shell.m as XSys4Module;
+        const m = window.shell.m;
         const rect = m._gfx_get_viewport();
         const x = m.HEAP32[(rect >> 2) + 0];
         const y = m.HEAP32[(rect >> 2) + 1];
