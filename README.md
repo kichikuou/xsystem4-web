@@ -5,8 +5,13 @@ website.
 
 ## Building the site
 
-To build the site, you will need to have [Node.js](https://nodejs.org) and
-[Emscripten](https://emscripten.org/) installed.
+To build the site, you will need to have the following software installed:
+
+- [Node.js](https://nodejs.org)
+- [Emscripten](https://emscripten.org/)
+- [CMake](https://cmake.org/)
+- [Bison](https://www.gnu.org/software/bison/)
+- [Flex](https://github.com/westes/flex)
 
 First, clone the repository and install the dependencies:
 
