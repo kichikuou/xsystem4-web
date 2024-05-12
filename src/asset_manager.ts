@@ -83,6 +83,11 @@ class Ald {
                 header[1] -= 0x1c;
                 header[2] = 0x00;
                 break;
+            case 0x35:  // Double Sensei Life DL edition
+                header[0] -= 0x31;
+                header[1] -= 0x3b;
+                header[2] = 0x00;
+                break;
             }
             const offsize = getUint24(header, 0) << 8;
             const linksize = (getUint24(header, 3) << 8) - offsize;
