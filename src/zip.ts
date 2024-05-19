@@ -6,6 +6,13 @@ const METHOD_DEFLATE = 8;
 const DOS_ATTR_DIRECTORY = 0x10;
 const DOS_ATTR_ARCHIVE = 0x20;
 
+class ZipError extends Error {
+    constructor(message?: string) {
+        super(message);
+        this.name = 'ZipError';
+    }
+}
+
 export class ZipFile {
     name: string;
     fileOffset: number;
@@ -22,11 +29,11 @@ export class ZipFile {
     constructor(private file: Blob, cde: Uint8Array) {
         const v = new DataView(cde.buffer, cde.byteOffset, cde.byteLength);
         if (v.getUint32(0, true) !== 0x02014B50) {  // "PK\001\002"
-            throw new Error('Invalid central directory');
+            throw new ZipError('Invalid central directory');
         }
         const versionMadeBy = v.getUint16(4, true);
         const versionNeeded = v.getUint16(6, true);
-        if (versionNeeded > 20) throw new Error('Unsupported ZIP version: ' + versionNeeded);
+        if (versionNeeded > 20) throw new ZipError('Unsupported ZIP version: ' + versionNeeded);
         this.gpbf = v.getUint16(8, true);
         this.method = v.getUint16(10, true);
         this.crc32 = v.getInt32(16, true);
@@ -34,8 +41,26 @@ export class ZipFile {
         this.uncompressedSize = v.getUint32(24, true);
         const fileNameLength = v.getUint16(28, true);
         this.fileOffset = v.getUint32(42, true);
+        const fileNameBytes = cde.subarray(46, 46 + fileNameLength);
         const encoding = this.guessPathEncoding(versionMadeBy);
-        this.name = new TextDecoder(encoding, { fatal: true }).decode(cde.subarray(46, 46 + fileNameLength));
+        try {
+            this.name = new TextDecoder(encoding, { fatal: true }).decode(fileNameBytes);
+        } catch (e) {
+            if (e instanceof TypeError) {
+                let name = '';
+                for (let i = 0; i < fileNameBytes.length; i++) {
+                    let c = fileNameBytes[i];
+                    if (0x20 <= c && c < 0x80) {
+                        name += String.fromCharCode(c);
+                    } else {
+                        name += '%' + c.toString(16).toUpperCase().padStart(2, '0');
+                    }
+                }
+                throw new ZipError(`Failed to decode file name: ${name}`);
+            } else {
+                throw e;
+            }
+        }
     }
 
     guessPathEncoding(versionMadeBy: number): string {
@@ -49,22 +74,22 @@ export class ZipFile {
         const localHeader = await readBytes(this.file, this.fileOffset, 30);
         const lhView = new DataView(localHeader);
         if (lhView.getUint32(0, true) !== 0x04034B50) {  // "PK\003\004"
-            throw new Error('Invalid local header');
+            throw new ZipError('Invalid local header');
         }
         const compressedDataOffset = this.fileOffset + 30 + lhView.getUint16(26, true) + lhView.getUint16(28, true);
         return this.file.slice(compressedDataOffset, compressedDataOffset + this.compressedSize);
     }
 
     async extract(): Promise<Uint8Array> {
-        if (this.isEncrypted()) throw new Error('Encrypted ZIP files are not supported');
+        if (this.isEncrypted()) throw new ZipError('Encrypted ZIP files are not supported');
         if (this.method === METHOD_STORE) {
             return new Uint8Array(await (await this.compressedData()).arrayBuffer());
         }
-        if (this.method !== METHOD_DEFLATE) throw new Error('Unsupported compression method: ' + this.method);
+        if (this.method !== METHOD_DEFLATE) throw new ZipError('Unsupported compression method: ' + this.method);
         const stream = (await this.compressedData()).stream().pipeThrough(new DecompressionStream('deflate-raw'));
         const data = await new Response(stream).arrayBuffer();
         if (~crc32(new Uint8Array(data)) !== this.crc32) {
-            throw new Error('CRC32 mismatch');
+            throw new ZipError('CRC32 mismatch');
         }
         return new Uint8Array(data);
     }
@@ -81,7 +106,7 @@ export async function load(file: Blob): Promise<ZipFile[]> {
         }
         oecdp--;
     }
-    if (oecdp < 0) throw new Error('Not a ZIP file');
+    if (oecdp < 0) throw new ZipError('Not a ZIP file');
 
     // Read the central directory.
     const cdSize = view.getUint32(oecdp + 12, true);
