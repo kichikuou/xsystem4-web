@@ -3,6 +3,7 @@ import { $, HOMEDIR, addToast, confirm } from './utils.js';
 import * as zip from './zip.js';
 
 const dialog = $('#system-menu') as HTMLDialogElement;
+const msgskip = $('#msgskip') as HTMLInputElement;
 
 $('#system-menu-close').addEventListener('click', () => dialog.close());
 $('#restart-game').addEventListener('click', () => {
@@ -28,10 +29,12 @@ export function initSaveMenu(FS: XSys4Module['FS'], gameName: string) {
 
 export function open() {
     dialog.appendChild($('.toast-container'));  // So that toasts are not hidden by the dialog.
+    msgskip.checked = window.shell.m._MsgSkip_GetState() !== 0;
     dialog.showModal();
 }
 
 dialog.addEventListener('close', () => {
+    window.shell.m._MsgSkip_SetState(msgskip.checked ? 1 : 0);
     document.body.appendChild($('.toast-container'));
 });
 
