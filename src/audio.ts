@@ -5,7 +5,7 @@ export class Audio {
     private masterGain: GainNode;
 
     constructor() {
-        this.context = new AudioContext({ sampleRate: 44100, latencyHint: 'balanced' });
+        this.context = new AudioContext({ latencyHint: 'balanced' });
         this.masterGain = this.context.createGain();
         this.masterGain.connect(this.context.destination);
         this.autoResumeAudioContext();
