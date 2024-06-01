@@ -46,7 +46,7 @@ async function runServer(ctx) {
 
         // Forward each incoming request to esbuild
         const proxyReq = http.request(options, proxyRes => {
-            if (req.url === '/play.html') {
+            if (req.url.startsWith('/play.html')) {
                 // Add COOP and COEP headers to the response from esbuild
                 proxyRes.headers['Cross-Origin-Opener-Policy'] = 'same-origin';
                 proxyRes.headers['Cross-Origin-Embedder-Policy'] = 'require-corp';
