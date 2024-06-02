@@ -122,7 +122,7 @@ export class Shell {
     private async setupSaveDir() {
         this.m.ENV['XSYSTEM4_HOME'] = HOMEDIR;
         this.m.FS.mkdir(HOMEDIR, undefined);
-        this.m.FS.mount(this.m.FS.filesystems.IDBFS, {}, HOMEDIR);
+        this.m.FS.mount(this.m.FS.filesystems.IDBFS, { autoPersist: true }, HOMEDIR);
         await new Promise<any>((res) => this.m.FS.syncfs(true, res));
     }
 
