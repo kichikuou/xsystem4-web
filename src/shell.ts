@@ -1,10 +1,19 @@
-import type { XSys4Module } from './xsystem4.js';
+import type { MainModule as XSys4Module } from './xsystem4.js';
 import { $, HOMEDIR, addToast, basename, isAppleDevice } from './utils.js';
 import { AssetManager } from './asset_manager.js';
 import { Audio } from './audio.js';
 import { HllValidator } from './hll_validator.js';
 import { InputString } from './input.js';
 import * as sysmenu from './sysmenu.js';
+
+export interface XSys4Shell {
+    m: XSys4Module;
+    resumeAudioContext: () => void;
+}
+
+declare global {
+    var shell: XSys4Shell;
+}
 
 const GAMEDIR = '/game';
 
@@ -44,7 +53,7 @@ async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
 export type GameFile = { path: string, file: File };
 
 export class Shell {
-    m: XSys4Module;
+    m: XSys4Module & { arguments?: string[] };
     private audio = new Audio();
     private nonResidentFiles = new Map<string, File>();
     assets = new AssetManager();
@@ -54,7 +63,7 @@ export class Shell {
         document.documentElement.setAttribute('data-theme', 'dark');
         create_xsystem4(async (module) => {
             this.m = module;
-            module.shell = this;  // Enable C code to access this object.
+            (module as any).shell = this;  // Enable C code to access this object.
             await Promise.all([
                 this.loadGameFiles(files),
                 this.loadFonts(),
@@ -80,7 +89,7 @@ export class Shell {
             path = `${GAMEDIR}/${path}`;
 
             const dir = path.replace(/\/[^/]+$/, '');
-            this.m.FS.mkdirTree(dir);
+            this.m.FS.mkdirTree(dir, undefined);
 
             const m = path.match(/(.)([a-z])\.ald$/i);
             if (m) {
@@ -112,13 +121,13 @@ export class Shell {
 
     private async setupSaveDir() {
         this.m.ENV['XSYSTEM4_HOME'] = HOMEDIR;
-        this.m.FS.mkdir(HOMEDIR);
+        this.m.FS.mkdir(HOMEDIR, undefined);
         this.m.FS.mount(this.m.FS.filesystems.IDBFS, {}, HOMEDIR);
         await new Promise<any>((res) => this.m.FS.syncfs(true, res));
     }
 
     private async loadFonts() {
-        this.m.FS.mkdir('/fonts');
+        this.m.FS.mkdir('/fonts', undefined);
         const gothic = 'fonts/VL-Gothic-Regular-SJIS.ttf';
         const mincho = 'fonts/HanaMinA-SJIS.ttf';
         for (const font of [gothic, mincho]) {
@@ -128,8 +137,8 @@ export class Shell {
                 this.m.FS.writeFile(font, buffer);
             }
         }
-        this.m.arguments.push('--font-gothic', gothic);
-        this.m.arguments.push('--font-mincho', mincho);
+        this.m.arguments!.push('--font-gothic', gothic);
+        this.m.arguments!.push('--font-mincho', mincho);
     }
 
     resumeAudioContext() {
@@ -158,17 +167,17 @@ export class Shell {
         const src = `${GAMEDIR}/${saveDir}`;
         const dest = `${HOMEDIR}/${gameName}/${saveDir}`;
         try {
-            if (!this.m.FS.isDir(this.m.FS.stat(src).mode))
+            if (!this.m.FS.isDir(this.m.FS.stat(src, undefined).mode))
                 return;
-            this.m.FS.mkdir(`${HOMEDIR}/${gameName}`);
-            this.m.FS.mkdir(dest);
+            this.m.FS.mkdir(`${HOMEDIR}/${gameName}`, undefined);
+            this.m.FS.mkdir(dest, undefined);
         } catch (e) {
             // `src` doesn't exist, or xsystem4 saves already exist.
             return;
         }
         try {
             for (const name of this.m.FS.readdir(src)) {
-                const stat = this.m.FS.stat(`${src}/${name}`);
+                const stat = this.m.FS.stat(`${src}/${name}`, undefined);
                 if (this.m.FS.isDir(stat.mode)) continue;
                 this.m.FS.writeFile(`${dest}/${name}`, this.m.FS.readFile(`${src}/${name}`));
                 this.m.FS.utime(`${dest}/${name}`, stat.atime, stat.mtime);

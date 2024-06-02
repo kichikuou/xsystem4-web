@@ -1,3 +1,4 @@
+src/xsystem4.d.ts
 build*/
 node_modules/
 dist/**/*.js

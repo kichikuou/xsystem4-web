@@ -1,4 +1,4 @@
-import type { XSys4Module } from './xsystem4.js';
+import type { MainModule as XSys4Module } from './xsystem4.js';
 import { $, HOMEDIR, addToast, confirm } from './utils.js';
 import * as zip from './zip.js';
 
@@ -82,7 +82,7 @@ async function importSave(FS: XSys4Module['FS'], gameName: string) {
         const path = '.xsystem4/' + file.name;
         if (file.name.endsWith('/')) {
             try {
-                FS.mkdir(path);
+                FS.mkdir(path, undefined);
             } catch (e) {}
         } else {
             FS.writeFile(path, await file.extract());

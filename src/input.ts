@@ -1,4 +1,3 @@
-import type { XSys4Module } from './xsystem4.js';
 import { $ } from "./utils.js";
 
 // This class is used from xsystem4/src/hll/InputString.c. To handle text input
