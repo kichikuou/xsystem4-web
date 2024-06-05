@@ -32,7 +32,6 @@ export async function InstallFromZip(zipFile: File) {
     } catch (e) {}
 
     const rootInZip = dirname(ini.iniPath);
-    let retryCount = 0;
     for (const file of files) {
         if (!file.name.startsWith(rootInZip + '/') || file.name.endsWith('/')) {
             progress.increase(file.uncompressedSize);
@@ -41,6 +40,7 @@ export async function InstallFromZip(zipFile: File) {
         progress.setFilename(file.name);
         const path = file.name.replace(rootInZip, `/${OPFS_GAMEDIR}`);
         // TODO: Consider extracting files in parallel.
+        let retryCount = 0;
         while (true) {
             try {
                 await worker.writeZipFile(path, file);
