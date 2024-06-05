@@ -64,6 +64,7 @@ class Ald {
     static async create(files: File[]) {
         let ltbl: DataView | null = null;
         const offsets: number[] = [];
+        let magic: Uint8Array | null = null;
         for (let vol = 0; vol < files.length; vol++) {
             const file = files[vol];
             if (!file) continue;
@@ -71,23 +72,14 @@ class Ald {
             if (header.byteLength < 6) {
                 throw new Error(file.name + ': Invalid ALD header');
             }
+            if (!magic && header[2] !== 0) {
+                magic = await this.findMagic(file, header);
+            }
             // un-obfuscate the first 3 bytes if necessary
-            switch (header[2]) {
-            case 0x44:  // Sengoku Rance DL edition, Haruka DL edition
-                header[0] -= 0x40;
-                header[1] -= 0x4c;
-                header[2] = 0x00;
-                break;
-            case 0x14:  // GALZOO island DL edition
-                header[0] -= 0x17;
-                header[1] -= 0x1c;
-                header[2] = 0x00;
-                break;
-            case 0x35:  // Double Sensei Life DL edition
-                header[0] -= 0x31;
-                header[1] -= 0x3b;
-                header[2] = 0x00;
-                break;
+            if (magic) {
+                header[0] -= magic[0];
+                header[1] -= magic[1];
+                header[2] -= magic[2];
             }
             const offsize = getUint24(header, 0) << 8;
             const linksize = (getUint24(header, 3) << 8) - offsize;
@@ -114,6 +106,32 @@ class Ald {
             throw new Error('No ALD files found');
         }
         return new Ald(files, ltbl, offsets);
+    }
+
+    // Find the magic number used to obfuscate the ALD header.
+    static async findMagic(file: File, header: Uint8Array): Promise<Uint8Array> {
+        const linksize = getUint24(header, 3) << 8;
+        const buf = new Uint8Array(await file.slice(0, linksize).arrayBuffer());
+        // Find the boundary between the ptr table and the link table.
+        let prev = -1;
+        for (let i = 6; i < buf.length - 2; i += 3) {
+            const n = getUint24(buf, i);
+            if (prev < n) {
+                prev = n;
+                continue;
+            }
+            const work = new ArrayBuffer(4);
+            const view = new DataView(work);
+            view.setUint32(0, (i + 0xff) >> 8, true);
+            const magic = new Uint8Array(work, 0, 3);
+            magic[0] = header[0] - magic[0];
+            magic[1] = header[1] - magic[1];
+            magic[2] = header[2] - magic[2];
+            console.log(`${file.name}: Magic bytes ${magic}`);
+            gtag('event', 'AldMagic', { FileName: file.name, Magic: `${magic}` });
+            return magic;
+        }
+        throw new Error(file.name + ': Invalid ALD header');
     }
 
     exists(no: number): boolean {
