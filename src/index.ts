@@ -1,5 +1,5 @@
 import { extractIconFromExe } from './icon_extractor.js';
-import { $, addToast, dirname, loadGameIni, registerErrorHandlers } from './utils.js';
+import { $, addToast, basename, dirname, loadGameIni, registerErrorHandlers } from './utils.js';
 import * as zip from './zip.js';
 
 $('#file-picker').addEventListener('change', (evt: Event) => {
@@ -29,7 +29,14 @@ export async function handleZip(zipFile: File) {
         icon = await iconFile.extract();
     } else {
         // Find an .exe file and extract an icon from it.
-        const exeFile = files.find(f => dirname(f.name) === iniDir && f.name.toLowerCase().endsWith('.exe'));
+        const exeFile = files.find((f) => {
+            if (dirname(f.name) !== iniDir) return false;
+            const lowerName = basename(f.name).toLowerCase();
+            return lowerName.endsWith('.exe') &&
+                   lowerName !== 'opensavefolder.exe' &&
+                   lowerName !== 'resetconfig.exe' &&
+                   lowerName !== 'uninstaller.exe';
+        });
         if (exeFile) {
             icon = extractIconFromExe((await exeFile.extract()).buffer);
         }
