@@ -107,6 +107,8 @@ export class Shell {
                 await this.assets.addAar(path, file);
             } else if (/\.(alm|mpg)$/i.test(path)) {
                 this.nonResidentFiles.set(path, file);
+                // Create a dummy file in the FS.
+                this.m.FS.writeFile(path, new Uint8Array());
             } else {
                 this.m.FS.writeFile(path, new Uint8Array(await file.arrayBuffer()));
                 const time = file.lastModified;
