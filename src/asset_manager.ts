@@ -1,7 +1,8 @@
 interface Archive {
     exists(no: number): boolean;
+    exists_by_name(name: string): number;
     load(no: number): Promise<Uint8Array | null>;
-    load_by_name(name: string): Promise<Uint8Array | null>;
+    load_by_name(name: string): Promise<{data: Uint8Array, no: number} | null>;
 }
 
 export class AssetManager {
@@ -11,6 +12,10 @@ export class AssetManager {
 
     async addAld(type: string, files: File[]) {
         this.alds.set(type, await Ald.create(files));
+    }
+
+    async addAfa(path: string, file: File) {
+        this.archives.set(path, await Afa1.create(file));
     }
 
     async addAar(path: string, file: File) {
@@ -49,11 +54,15 @@ export class AssetManager {
         return this.handles.get(handle)!.exists(no);
     }
 
+    exists_by_name(handle: number, name: string): number {
+        return this.handles.get(handle)!.exists_by_name(name);
+    }
+
     load(handle: number, no: number): Promise<Uint8Array | null> {
         return this.handles.get(handle)!.load(no);
     }
 
-    load_by_name(handle: number, name: string): Promise<Uint8Array | null> {
+    load_by_name(handle: number, name: string): Promise<{data: Uint8Array, no: number} | null> {
         return this.handles.get(handle)!.load_by_name(name);
     }
 }
@@ -177,6 +186,81 @@ function getUint24(buf: Uint8Array, offset: number) {
     return buf[offset] | (buf[offset + 1] << 8) | (buf[offset + 2] << 16);
 }
 
+type Afa1Entry = { offset: number, size: number, name: string, no: number };
+
+class Afa1 implements Archive {
+    static async create(file: File) {
+        const header = await file.slice(0, 44).arrayBuffer();
+        const hv = new DataView(header);
+        if (hv.getUint32(0, true) !== 0x48414641) {  // 'AFAH'
+            throw new Error('not an AFA file');
+        }
+        if (hv.getUint32(8, true) !== 0x63696c41 || hv.getUint32(12, true) !== 0x68637241) {  // 'AlicArch'
+            throw new Error('not an AlicArch file');
+        }
+        const afaVersion = hv.getUint32(0x10, true);
+        if (afaVersion !== 1 && afaVersion !== 2) {
+            throw new Error('unsupported AFA version ' + afaVersion);
+        }
+        const dataStart = hv.getUint32(0x18, true);
+        if (hv.getUint32(0x1c, true) !== 0x4F464E49) {  // 'INFO'
+            throw new Error('cannot find INFO section');
+        }
+        const compressedSize = hv.getUint32(0x20, true) - 16;
+        const fileCount = hv.getUint32(0x28, true);
+        const stream = file.slice(44, 44 + compressedSize).stream().pipeThrough(new DecompressionStream('deflate'));
+        const indexBuf = await new Response(stream).arrayBuffer();
+        const v = new DataView(indexBuf);
+        const entries: Afa1Entry[] = [];
+        let ofs = 0;
+        for (let i = 0; i < fileCount; i++) {
+            const nameSize = v.getUint32(ofs, true);
+            const paddedSize = v.getUint32(ofs + 4, true);
+            // FIXME: This may not match xsystem4's sjis2utf().
+            const name = new TextDecoder('shift_jis').decode(new Uint8Array(indexBuf, ofs + 8, nameSize));
+            ofs += 8 + paddedSize + (afaVersion === 1 ? 12 : 8);
+            const offset = v.getUint32(ofs, true) + dataStart;
+            const size = v.getUint32(ofs + 4, true);
+            ofs += 8;
+            entries.push({ offset, size, name, no: i });
+        }
+        if (ofs !== indexBuf.byteLength) {
+            throw new Error('invalid AFA index');
+        }
+        return new Afa1(file, entries);
+    }
+
+    private index = new Map<string, Afa1Entry>();
+    constructor(private file: File, private entries: Afa1Entry[]) {
+        for (const entry of entries) {
+            this.index.set(archiveBasename(entry.name), entry);
+        }
+    }
+
+    exists(no: number): boolean {
+        throw new Error('not implemented');
+    }
+
+    exists_by_name(name: string): number {
+        const entry = this.index.get(archiveBasename(name));
+        if (!entry) return -1;
+        return entry.no;
+    }
+
+    async load(no: number): Promise<Uint8Array | null> {
+        const entry = this.entries[no];
+        if (!entry) return null;
+        return new Uint8Array(await this.file.slice(entry.offset, entry.offset + entry.size).arrayBuffer());
+    }
+
+    async load_by_name(name: string): Promise<{data: Uint8Array, no: number} | null> {
+        const entry = this.index.get(archiveBasename(name));
+        if (!entry) return null;
+        const data = new Uint8Array(await this.file.slice(entry.offset, entry.offset + entry.size).arrayBuffer());
+        return { data, no: entry.no };
+    }
+}
+
 class Dlf implements Archive {
     private entries: Blob[] = [];
 
@@ -202,13 +286,17 @@ class Dlf implements Archive {
         return !!this.entries[no];
     }
 
+    exists_by_name(name: string): number {
+        throw new Error('not implemented');
+    }
+
     async load(no: number): Promise<Uint8Array | null> {
         const entry = this.entries[no];
         if (!entry) return null;
         return new Uint8Array(await entry.arrayBuffer());
     }
 
-    async load_by_name(name: string): Promise<Uint8Array | null> {
+    async load_by_name(name: string): Promise<{data: Uint8Array, no: number} | null> {
         throw new Error('not implemented');
     }
 }
@@ -250,15 +338,26 @@ class Aar implements Archive {
         throw new Error('not implemented');
     }
 
+    exists_by_name(name: string): number {
+        throw new Error('not implemented');
+    }
+
     async load(no: number): Promise<Uint8Array | null> {
         throw new Error('not implemented');
     }
 
-    async load_by_name(name: string): Promise<Uint8Array | null> {
+    async load_by_name(name: string): Promise<{data: Uint8Array, no: number} | null> {
         const entry = this.entries.get(name.toLowerCase());
         if (!entry) return null;
-        return new Uint8Array(await this.file.slice(entry.offset, entry.offset + entry.size).arrayBuffer());
+        const data = new Uint8Array(await this.file.slice(entry.offset, entry.offset + entry.size).arrayBuffer());
+        return { data, no: -1 };
     }
+}
+
+function archiveBasename(path: string) {
+    const i = path.lastIndexOf('.');
+    if (i >= 0) path = path.slice(0, i);
+    return path.toLowerCase().replace(/\//g, '\\');
 }
 
 function readStrZ(v: DataView, ofs: number): Uint8Array {

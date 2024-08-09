@@ -101,6 +101,10 @@ export class Shell {
                 alds.get(type)![vol] = file;
                 // Create a dummy file in the FS.
                 this.m.FS.writeFile(path, new Uint8Array());
+            } else if (/\.afa$/i.test(path)) {
+                await this.assets.addAfa(path, file);
+                // Create a dummy file in the FS.
+                this.m.FS.writeFile(path, new Uint8Array());
             } else if (/\.dlf$/i.test(path)) {
                 await this.assets.addDlf(path, file);
             } else if (basename(path).toLowerCase() === 'reigndata.red') {
