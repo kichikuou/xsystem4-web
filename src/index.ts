@@ -16,8 +16,13 @@ export async function handleZip(zipFile: File) {
     const files = await zip.load(zipFile);
     const ini = await loadGameIni(files);
     if (!ini) {
-        addToast('ZIPファイルにゲームデータが見つかりません。', 'error');
-        gtag('event', 'InstallError', { Reason: 'No game data found in ZIP' });
+        if (files.find(f => f.name.match(/SA\.ALD$/i))) {
+            addToast('System3.xのゲームです。鬼畜王 on Webをご利用ください。', 'error');
+            gtag('event', 'InstallError', { Reason: 'System 3.x game data' });
+        } else {
+            addToast('ZIPファイルにゲームデータが見つかりません。', 'error');
+            gtag('event', 'InstallError', { Reason: 'No game data found in ZIP' });
+        }
         return;
     }
 
