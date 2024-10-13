@@ -218,11 +218,18 @@ class Afa1 implements Archive {
             const paddedSize = v.getUint32(ofs + 4, true);
             // FIXME: This may not match xsystem4's sjis2utf().
             const name = new TextDecoder('shift_jis').decode(new Uint8Array(indexBuf, ofs + 8, nameSize));
-            ofs += 8 + paddedSize + (afaVersion === 1 ? 12 : 8);
+            ofs += 8 + paddedSize;
+            let no = i;
+            if (afaVersion === 1) {
+                const n = v.getUint32(ofs, true) - 1;
+                if (n !== 0) no = n;  // for Oyako Rankan
+                ofs += 4;
+            }
+            ofs += 8; // skip the timestamp
             const offset = v.getUint32(ofs, true) + dataStart;
             const size = v.getUint32(ofs + 4, true);
             ofs += 8;
-            entries.push({ offset, size, name, no: i });
+            entries.push({ offset, size, name, no });
         }
         if (ofs !== indexBuf.byteLength) {
             throw new Error('invalid AFA index');
@@ -230,31 +237,33 @@ class Afa1 implements Archive {
         return new Afa1(file, entries);
     }
 
-    private index = new Map<string, Afa1Entry>();
-    constructor(private file: File, private entries: Afa1Entry[]) {
+    private nameIndex = new Map<string, Afa1Entry>();
+    private numberIndex = new Map<number, Afa1Entry>();
+    constructor(private file: File, entries: Afa1Entry[]) {
         for (const entry of entries) {
-            this.index.set(archiveBasename(entry.name), entry);
+            this.nameIndex.set(archiveBasename(entry.name), entry);
+            this.numberIndex.set(entry.no, entry);
         }
     }
 
     exists(no: number): boolean {
-        throw new Error('not implemented');
+        return this.numberIndex.has(no);
     }
 
     exists_by_name(name: string): number {
-        const entry = this.index.get(archiveBasename(name));
+        const entry = this.nameIndex.get(archiveBasename(name));
         if (!entry) return -1;
         return entry.no;
     }
 
     async load(no: number): Promise<Uint8Array | null> {
-        const entry = this.entries[no];
+        const entry = this.numberIndex.get(no);
         if (!entry) return null;
         return new Uint8Array(await this.file.slice(entry.offset, entry.offset + entry.size).arrayBuffer());
     }
 
     async load_by_name(name: string): Promise<{data: Uint8Array, no: number} | null> {
-        const entry = this.index.get(archiveBasename(name));
+        const entry = this.nameIndex.get(archiveBasename(name));
         if (!entry) return null;
         const data = new Uint8Array(await this.file.slice(entry.offset, entry.offset + entry.size).arrayBuffer());
         return { data, no: entry.no };
