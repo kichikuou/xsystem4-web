@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 import { concatBuffers } from './utils.js';
 
 // Resource types.

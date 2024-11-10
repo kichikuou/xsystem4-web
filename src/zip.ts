@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 const GPBF_ENCRYPTED = 0x0001;
 const GPBF_UTF8 = 0x0800;
 const OS_UNIX = 3;

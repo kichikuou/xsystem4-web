@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 import { dictionary } from './strings.js';
 import { $, OPFS_GAMEDIR, addToast, dirname, loadGameIni, registerErrorHandlers } from './utils.js';
 import * as zip from './zip.js';

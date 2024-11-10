@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 import { extractIconFromExe } from './icon_extractor.js';
 import { dictionary } from './strings.js';
 import { $, addToast, basename, dirname, loadGameIni, registerErrorHandlers } from './utils.js';

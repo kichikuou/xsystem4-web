@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 import { $ } from "./utils.js";
 
 // This class is used from xsystem4/src/hll/InputString.c. To handle text input

@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 import type { MainModule as XSys4Module } from './xsystem4.js';
 import { dictionary } from './strings.js';
 import { $, HOMEDIR, addToast, confirm } from './utils.js';

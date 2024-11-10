@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 // A worker that writes files to OPFS.
 // This is necessary because OPFS is not writable from the main thread in Safari.
 import { crc32 } from '../zip.js';

@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 import type { MainModule as XSys4Module } from './xsystem4.js';
 import { $, HOMEDIR, addToast, basename, isAppleDevice } from './utils.js';
 import { AssetManager } from './asset_manager.js';

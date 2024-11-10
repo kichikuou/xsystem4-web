@@ -1,3 +1,6 @@
+// Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
+// Licensed under the MIT License. See the LICENSE file for details.
+
 import { GameFile, Shell } from './shell.js'
 import { dictionary } from './strings.js';
 import { $, OPFS_GAMEDIR, addToast, registerErrorHandlers } from './utils.js';
