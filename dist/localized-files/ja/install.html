@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark" />
     <link rel="stylesheet" href="lib/pico.min.css">
     <link rel="stylesheet" href="index.css">
-    <title>XSystem4 Web Installer</title>
+    <title>XSystem4 Webインストーラ</title>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ER5NLGNC86"></script>
     <script>
@@ -25,7 +25,7 @@
       <div class="container">
         <nav>
           <ul>
-            <li><strong>XSystem4 Web Installer</strong></li>
+            <li><strong>XSystem4 Webインストーラ</strong></li>
           </ul>
         </nav>
       </div>
@@ -34,21 +34,21 @@
     <div class="container">
 
       <div id="installer">
-        <h3>Install</h3>
+        <h3>インストール</h3>
         <section>
-          <p>Please select the ZIP of '<span id="title"></span>' again to complete the installation.</p>
+          <p>『<span id="title"></span>』のZIPをもう一度選択して、インストールを完了してください。</p>
           <input type="file" id="file-picker"/>
         </section>
       </div>
 
       <div id="installing" hidden>
         <progress id="progress" value="0"></progress>
-        <p id="message">Installing… <span id="percentages"></span></p>
+        <p id="message">インストール中… <span id="percentages"></span></p>
         <p><small id="filename"></small></p>
       </div>
 
       <div id="game-start" hidden>
-        <a role="button" href="play.html">Start Game</a>
+        <a role="button" href="play.html">ゲーム開始</a>
       </div>
 
     </div>

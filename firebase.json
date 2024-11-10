@@ -6,6 +6,9 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "i18n": {
+      "root": "localized-files"
+    },
     "headers": [
       {
         "source": "/play.html",

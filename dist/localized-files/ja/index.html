@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" prefix="og: http://ogp.me/ns#">
+<html lang="ja" prefix="og: http://ogp.me/ns#">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark" />
     <link rel="stylesheet" href="lib/pico.min.css">
     <link rel="stylesheet" href="index.css">
-    <title>XSystem4 Web Installer</title>
-    <meta property="og:title" content="XSystem4 Web Installer" />
-    <meta property="og:description" content="Install AliceSoft games (such as 'Sengoku Rance') to the home screen of your iPhone / iPad." />
+    <title>XSystem4 Webインストーラ</title>
+    <meta property="og:title" content="XSystem4 Webインストーラ" />
+    <meta property="og:description" content="アリスソフトの『戦国ランス』等のゲームを iPhone / iPad のホーム画面にインストールできます。" />
     <meta name="twitter:card" content="summary">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ER5NLGNC86"></script>
@@ -28,7 +28,7 @@
       <div class="container">
         <nav>
           <ul>
-            <li><strong>XSystem4 Web Installer</strong></li>
+            <li><strong>XSystem4 Webインストーラ</strong></li>
           </ul>
           <ul id="loader-toolbar">
             <li><a href="https://twitter.com/KichikuouWeb" target="_blank">
@@ -53,94 +53,95 @@
 
     <div class="container">
       <div id="introduction">
-        <p>This is a web application to install AliceSoft's games like 'Sengoku Rance' to the home screen of your iPhone / iPad.</p>
+        <p>アリスソフトの『戦国ランス』等のゲームを iPhone / iPad のホーム画面にインストールするためのWebアプリです。</p>
       </div>
 
       <div id="installer">
         <section>
-          <h3>Installation Instructions</h3>
+          <h3>インストール方法</h3>
           <ol>
-            <li>On your PC, compress the folder containing the game data (e.g., <code>C:\AliceSoft\Sengoku Rance</code>) into a ZIP file.</li>
-            <li>Transfer the compressed ZIP file to your iPhone / iPad, e.g. using cloud storage such as iCloud.</li>
-            <li>Open this page in Safari on your iPhone / iPad and press the "Choose File" button below.</li>
-            <li>Select the transferred ZIP file. Follow the on-screen instructions to install.</li>
+            <li>PC上で、ゲームデータのあるフォルダー（例: <code>C:\AliceSoft\戦国ランス</code>）をZIP形式で圧縮します。</li>
+            <li>圧縮したZIPファイルを、iPhone / iPad に転送します。iCloudなどのクラウドストレージを使うといいでしょう。</li>
+            <li>iPhone / iPad の Safari でこのページを開いて、下の「ファイルを選択」ボタンを押します。</li>
+            <li>転送したZIPファイルを選択します。あとは画面の指示に従ってインストールしてください。</li>
           </ol>
           <input type="file" id="file-picker"/>
         </section>
 
         <section>
-          <h3>Supported Games</h3>
+          <h3>動作確認済みゲーム</h3>
           <ul>
-            <li>DALK Gaiden</li>
-            <li>Mamanyonyo</li>
-            <li>Daibanchou -Big Bang Age-</li>
-            <li>Rance VI -Collapse of Zeth-</li>
-            <li>Ultra Mahou Shoujo Manana</li>
-            <li>Suzumiya Keimu Shoukan</li>
-            <li>Shimaima.</li>
-            <li>Galzoo Island</li>
-            <li>Yokubari Saboten</li>
-            <li>Sengoku Rance</li>
-            <li>Ojou-sama o Iinari ni Suru Game</li>
-            <li>Sengoku Rance -Slash! Thrust! Burn!-</li>
-            <li>Edo Ranze ~Come on! Mito Hime-sama~</li>
-            <li>Toshin Toshi III</li>
-            <li>Haru Urare</li>
-            <li>Widenyo</li>
-            <li>Rance 02</li>
-            <li>Rance 01</li>
-            <li>(mod) Sengoku Rance -Ludo-Rathowm Continent Edition-</li>
-            <li>(mod) Daisengoku Rance</li>
+            <li>DALK外伝</li>
+            <li>ままにょにょ</li>
+            <li>大番長 -Big Bang Age-</li>
+            <li>Rance VI -ゼス崩壊-</li>
+            <li>ウルトラ魔法少女まなな</li>
+            <li>鈴宮刑務娼館</li>
+            <li>しまいま。</li>
+            <li>GALZOOアイランド</li>
+            <li>よくばりサボテン</li>
+            <li>戦国ランス</li>
+            <li>お嬢様をいいなりにするゲーム</li>
+            <li>戦国ランス～三匹が斬ったり突いたり燃やしたり</li>
+            <li>エドランゼ ～Come on!水戸姫様～</li>
+            <li>闘神都市III</li>
+            <li>はるうられ -校内赤線区域-</li>
+            <li>わいどにょ</li>
+            <li>ランス02 -反逆の少女たち-</li>
+            <li>ランス01 -光をもとめて-</li>
+            <li>戦国ランスMOD ルドラサウム大陸版</li>
+            <li>戦国ランスMOD 大戦国ランス</li>
           </ul>
         </section>
 
         <section>
-          <h3>Touch Controls</h3>
+          <h3>操作方法</h3>
           <table>
             <thead>
               <tr>
-                <th scope="col">Touch Operation</th>
-                <th scope="col">Corresponding Action</th>
+                <th scope="col">タッチ操作</th>
+                <th scope="col">対応する動作</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Tap</td>
-                <td>Click</td>
+                <td>タップ</td>
+                <td>クリック</td>
               </tr>
               <tr>
-                <td>Tap the black area outside the game screen</td>
-                <td>Right-click</td>
+                <td>ゲーム画面外の黒い部分をタップ</td>
+                <td>右クリック</td>
               </tr>
               <tr>
-                <td>Long press on the screen</td>
-                <td>Ctrl key</td>
+                <td>画面長押し</td>
+                <td>Ctrlキー</td>
               </tr>
               <tr>
-                <td>Long press outside the screen</td>
-                <td>Show system menu</td>
+                <td>画面外長押し</td>
+                <td>システムメニュー表示</td>
               </tr>
               <tr>
-                <td>Swipe up and down with two fingers</td>
-                <td>Wheel scroll</td>
+                <td>2本指上下スワイプ</td>
+                <td>ホイールスクロール</td>
               </tr>
             </tbody>
           </table>
         </section>
 
         <section>
-          <h3>How to Uninstall</h3>
+          <h3>アンインストール方法</h3>
           <p>
-            Long press the icon on the home screen and select "Delete Bookmark". This will also delete the game data and save data.
+            ホーム画面のアイコンを長押しして、「ブックマークを削除」を選択します。
+            これでゲームデータとセーブデータも削除されます。
           </p>
         </section>
 
         <section>
-          <h3>Notes</h3>
+          <h3>注意事項</h3>
           <ul>
-            <li>Many of the games playable with this web application are for adults.</li>
-            <li>This is produced by an individual unrelated to AliceSoft. Do not contact AliceSoft for support.</li>
-            <li>No warranty. Use at your own risk.</li>
+            <li>このWebアプリで遊べる作品の多くは成人向けです。利用の際はご注意ください。</li>
+            <li>アリスソフトとは無関係の個人による制作です。アリスソフトへの問い合わせはしないでください。</li>
+            <li>無保証です。自己責任でご利用ください。</li>
           </ul>
         </section>
 
@@ -149,9 +150,9 @@
 
     <dialog id="add-to-home-screen">
       <article>
-        <h2>Add to Home Screen</h2>
+        <h2>ホーム画面に追加</h2>
         <p>
-          From the share button at the top right
+          右上の共有ボタン
           <!-- https://tabler.io/icons/icon/share-2 -->
           <svg id="share-button" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-share-2">
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -159,10 +160,11 @@
             <path d="M12 14v-11" />
             <path d="M9 6l3 -3l3 3" />
           </svg>
-          , select "Add to Home Screen" → "Add", and tap the icon added to the home screen.
+          から「ホーム画面に追加」を選択→「追加」して、<br />
+          ホーム画面に追加されたアイコンをタップしてください。
         </p>
         <p>
-          After adding to the home screen, you can close this page.
+          ホーム画面に追加した後は、このページは閉じることができます。
         </p>
       </article>
     </dialog>
