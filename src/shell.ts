@@ -4,6 +4,7 @@ import { AssetManager } from './asset_manager.js';
 import { Audio } from './audio.js';
 import { HllValidator } from './hll_validator.js';
 import { InputString } from './input.js';
+import { dictionary } from './strings.js';
 import * as sysmenu from './sysmenu.js';
 
 export interface XSys4Shell {
@@ -163,7 +164,7 @@ export class Shell {
         msg = msg.replace(/^\*ERROR\*\([^)]+\):/, '').trim();
         gtag('event', 'XSys4Error', { Message: msg });
         window.onbeforeunload = null;
-        addToast(`エラーが発生しました。\n${msg}`, 'error');
+        addToast(dictionary.error_occurred + '\n' + msg, 'error');
     }
 
     init_save(gameName: string, saveDir: string) {

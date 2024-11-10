@@ -1,3 +1,4 @@
+import { dictionary } from './strings.js';
 import { $, OPFS_GAMEDIR, addToast, dirname, loadGameIni, registerErrorHandlers } from './utils.js';
 import * as zip from './zip.js';
 import type { InstallerWorkerRequest, InstallerWorkerResponse } from './worker/installer_worker.js';
@@ -7,7 +8,7 @@ $('#file-picker').addEventListener('change', async (evt: Event) => {
     if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
         await InstallFromZip(files[0]);
     } else {
-        addToast('ZIPファイルを選択してください。', 'warning');
+        addToast(dictionary.not_a_zip_file, 'warning');
         gtag('event', 'InstallError', { Reason: 'No ZIP file selected' });
     }
 }, false);
@@ -17,7 +18,7 @@ export async function InstallFromZip(zipFile: File) {
     const files = await zip.load(zipFile);
     const ini = await loadGameIni(files);
     if (!ini) {
-        addToast('ZIPファイルにゲームデータが見つかりません。', 'error');
+        addToast(dictionary.no_game_data_in_zip, 'error');
         gtag('event', 'InstallError', { Reason: 'No game data found in ZIP' });
         return;
     }
@@ -48,7 +49,7 @@ export async function InstallFromZip(zipFile: File) {
             } catch (e) {
                 gtag('event', 'InstallWorkerError', { Message: e, RetryCount: retryCount });
                 if (++retryCount >= 3) {
-                    addToast(`ファイルの書き込みに失敗しました。\n${e}`, 'error');
+                    addToast(dictionary.file_write_error + `\n${e}`, 'error');
                     return;
                 };
             }
@@ -82,7 +83,7 @@ class InstallProgress {
     finish() {
         this.progress.max = this.progress.value = 1;
         this.setFilename('');
-        $('#message').textContent = 'インストール完了';
+        $('#message').textContent = dictionary.installation_finished;
         $('#game-start').hidden = false;
     }
 }

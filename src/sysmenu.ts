@@ -1,4 +1,5 @@
 import type { MainModule as XSys4Module } from './xsystem4.js';
+import { dictionary } from './strings.js';
 import { $, HOMEDIR, addToast, confirm } from './utils.js';
 import * as zip from './zip.js';
 
@@ -7,7 +8,7 @@ const msgskip = $('#msgskip') as HTMLInputElement;
 
 $('#system-menu-close').addEventListener('click', () => dialog.close());
 $('#restart-game').addEventListener('click', () => {
-    if (confirm('セーブされていないデータは失われます。\nゲームを再起動しますか？')) {
+    if (confirm(dictionary.restart_confirmation)) {
         gtag('event', 'RestartGame');
         window.shell.m._xsystem4_reset();
         dialog.close();
@@ -75,7 +76,7 @@ async function importSave(FS: XSys4Module['FS'], gameName: string) {
     if (!zipFile) return;
     const files = await zip.load(zipFile);
     if (!files.every(f => f.name.startsWith(gameName + '/'))) {
-        addToast(`${gameName} のセーブデータではありません。`, 'error');
+        addToast(dictionary.not_savefiles_for(gameName), 'error');
         return;
     }
     for (const file of files) {
@@ -90,7 +91,7 @@ async function importSave(FS: XSys4Module['FS'], gameName: string) {
     }
     await new Promise<any>((res) => FS.syncfs(false, res));
     gtag('event', 'ImportSave');
-    if (confirm('セーブデータを取り込みました。\nゲームを再起動しますか？')) {
+    if (confirm(dictionary.saves_imported)) {
         window.shell.m._xsystem4_reset();
         dialog.close();
     }

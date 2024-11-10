@@ -1,4 +1,5 @@
 import { GameFile, Shell } from './shell.js'
+import { dictionary } from './strings.js';
 import { $, OPFS_GAMEDIR, addToast, registerErrorHandlers } from './utils.js';
 
 registerErrorHandlers();
@@ -13,7 +14,7 @@ getFilesFromOPFS().then(files => {
         // Continue the installation process.
         location.href = './install.html' + url.hash;
     } else {
-        addToast('ゲームがインストールされていません。', 'error');
+        addToast(dictionary.no_game_installed, 'error');
         gtag('event', 'GameNotInstalled');
         registerDropHandler();
     }
@@ -47,7 +48,7 @@ function registerDropHandler() {
             const files = getFilesFromDirectory(entry as FileSystemDirectoryEntry);
             window.shell = new Shell(files);
         } else {
-            addToast('フォルダーをドラッグ＆ドロップしてください。', 'warning');
+            addToast(dictionary.drag_and_drop_a_folder, 'warning');
         }
     }, false);
 }

@@ -1,4 +1,5 @@
 import type { ZipFile } from './zip.js';
+import { dictionary } from './strings.js';
 
 export const $: (selector: string) => HTMLElement = document.querySelector.bind(document);
 
@@ -9,7 +10,7 @@ export function registerErrorHandlers() {
     window.addEventListener('error', (evt: ErrorEvent) => {
         const { message, filename, lineno, colno, error } = evt;
         console.error(error);
-        addToast(`エラーが発生しました。\n${message}`, 'error');
+        addToast(dictionary.error_occurred + '\n' + message, 'error');
         gtag('event', 'Error', { Message: message, Filename: filename, Lineno: lineno, Colno: colno, Error: error });
     }, { once: true });
 
@@ -17,7 +18,7 @@ export function registerErrorHandlers() {
         const reason = evt.reason;
         if (reason instanceof Error) {
             let { name, message, stack } = reason;
-            addToast(`エラーが発生しました。\n${message}`, 'error');
+            addToast(dictionary.error_occurred + '\n' + message, 'error');
             gtag('event', 'UnhandledRejection', { Name: name, Message: message, Stack: stack });
         } else {
             gtag('event', 'UnhandledRejection', { Name: reason.constructor.name, Reason: reason });

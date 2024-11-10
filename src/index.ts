@@ -1,4 +1,5 @@
 import { extractIconFromExe } from './icon_extractor.js';
+import { dictionary } from './strings.js';
 import { $, addToast, basename, dirname, loadGameIni, registerErrorHandlers } from './utils.js';
 import * as zip from './zip.js';
 
@@ -7,7 +8,7 @@ $('#file-picker').addEventListener('change', (evt: Event) => {
     if (files.length === 1 && files[0].name.toLowerCase().endsWith('.zip')) {
         handleZip(files[0]);
     } else {
-        addToast('ZIPファイルを選択してください。', 'warning');
+        addToast(dictionary.not_a_zip_file, 'warning');
         gtag('event', 'InstallError', { Reason: 'No ZIP file selected' });
     }
 }, false);
@@ -17,10 +18,10 @@ export async function handleZip(zipFile: File) {
     const ini = await loadGameIni(files);
     if (!ini) {
         if (files.find(f => f.name.match(/SA\.ALD$/i))) {
-            addToast('System3.xのゲームです。鬼畜王 on Webをご利用ください。', 'error');
+            addToast(dictionary.system3x_game, 'error');
             gtag('event', 'InstallError', { Reason: 'System 3.x game data' });
         } else {
-            addToast('ZIPファイルにゲームデータが見つかりません。', 'error');
+            addToast(dictionary.no_game_data_in_zip, 'error');
             gtag('event', 'InstallError', { Reason: 'No game data found in ZIP' });
         }
         return;
@@ -90,6 +91,6 @@ registerErrorHandlers();
 
 if (!navigator.storage || !navigator.storage.estimate) {
     ($('#file-picker') as HTMLInputElement).disabled = true;
-    addToast('このブラウザでは動作しません。iOS / iPadOS 17以上が必要です。', 'error');
+    addToast(dictionary.unsupported_browser, 'error');
     gtag('event', 'UnsupportedBrowser');
 }
