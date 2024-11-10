@@ -70,7 +70,8 @@ async function generateManifest(title: string, icon: Uint8Array | null) {
         });
     }
     const baseUrl = new URL(location.href);
-    const startUrl = new URL('play.html?pwa=1#' + encodeURIComponent(title), baseUrl);
+    const lang = document.documentElement.getAttribute('lang');
+    const startUrl = new URL(`play.html?pwa=1&lang=${lang}#${encodeURIComponent(title)}`, baseUrl);
 
     const manifest = {
         name: title + ' - XSystem4 for Web',

@@ -12,6 +12,7 @@ getFilesFromOPFS().then(files => {
     if (url.searchParams.get('pwa')) {
         // The user has just added the PWA to the home screen.
         // Continue the installation process.
+        document.cookie = "firebase-language-override=" + url.searchParams.get('lang') + "; max-age=315360000";
         location.href = './install.html' + url.hash;
     } else {
         addToast(dictionary.no_game_installed, 'error');
