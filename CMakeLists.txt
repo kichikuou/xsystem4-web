@@ -7,8 +7,6 @@ endif()
 
 project(xsystem4-wasm)
 
-option(ENABLE_JSPI "Enable JSPI" OFF)
-
 include(ExternalProject)
 
 set(stagingDir ${CMAKE_CURRENT_BINARY_DIR}/stage)
@@ -18,12 +16,6 @@ set(stagingDir ${CMAKE_CURRENT_BINARY_DIR}/stage)
 # https://github.com/emscripten-core/emscripten/issues/19667
 # https://github.com/emscripten-core/emscripten/pull/18379
 set(COMMON_CFLAGS "-sWASM_WORKERS=1 -pthread")
-
-if (ENABLE_JSPI)
-  # ASYNCIFY=2 does not work with SUPPORT_LONGJMP=emscripten.
-  # https://github.com/emscripten-core/emscripten/issues/19672
-  set(COMMON_CFLAGS "${COMMON_CFLAGS} -sSUPPORT_LONGJMP=wasm")
-endif()
 
 set(COMMON_CMAKE_ARGS
   -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -123,18 +115,11 @@ ExternalProject_Add(
 
 ExternalProject_Add_StepDependencies(libsndfile configure libvorbis flac opus)
 
-if (ENABLE_JSPI)
-  set(DEST_DIR dist/jspi)
-else ()
-  set(DEST_DIR dist)
-endif ()
-
 ExternalProject_Add(
   xsystem4
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/xsystem4
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-              -DENABLE_JSPI=${ENABLE_JSPI}
-              -DXSYSTEM4_INSTALL_DIR=${CMAKE_CURRENT_LIST_DIR}/${DEST_DIR}
+              -DXSYSTEM4_INSTALL_DIR=${CMAKE_CURRENT_LIST_DIR}/dist
               -DXSYSTEM4_TS_INSTALL_DIR=${CMAKE_CURRENT_LIST_DIR}/src
   BUILD_ALWAYS YES
   )

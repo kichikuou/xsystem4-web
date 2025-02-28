@@ -3,7 +3,6 @@
 
 import type { MainModule as XSys4Module } from './xsystem4.js';
 import { $, HOMEDIR, addToast, basename, isAppleDevice } from './utils.js';
-import { AssetManager } from './asset_manager.js';
 import { Audio } from './audio.js';
 import { HllValidator } from './hll_validator.js';
 import { InputString } from './input.js';
@@ -49,7 +48,7 @@ async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
             shared: true
         });
     }
-    const url = ('Suspender' in WebAssembly) ? './jspi/xsystem4.js' : './xsystem4.js';
+    const url = './xsystem4.js';
     const xsystem4_factory = (await import(url)).default;
     return xsystem4_factory(module);
 }
@@ -59,8 +58,6 @@ export type GameFile = { path: string, file: File };
 export class Shell {
     m: XSys4Module & { arguments?: string[] };
     private audio = new Audio();
-    private nonResidentFiles = new Map<string, File>();
-    assets = new AssetManager();
     input = new InputString();
 
     constructor(files: AsyncGenerator<GameFile>) {
@@ -80,8 +77,6 @@ export class Shell {
 
     // Load files into Emscripten virtual filesystem.
     private async loadGameFiles(files: AsyncGenerator<GameFile>) {
-        const alds = new Map<string, File[]>();
-
         for await (let { path, file } of files) {
             // Skip files unnecessary for us.
             if (/\.(exe|inc|dll)$/i.test(path)) continue;
@@ -95,37 +90,9 @@ export class Shell {
             const dir = path.replace(/\/[^/]+$/, '');
             this.m.FS.mkdirTree(dir, undefined);
 
-            const m = path.match(/(.)([a-z])\.ald$/i);
-            if (m) {
-                const type = m[1].toUpperCase();
-                const vol = m[2].toUpperCase().charCodeAt(0) - 65 /* 'A' */;
-                if (!alds.has(type)) {
-                    alds.set(type, []);
-                }
-                alds.get(type)![vol] = file;
-                // Create a dummy file in the FS.
-                this.m.FS.writeFile(path, new Uint8Array());
-            } else if (/\.afa$/i.test(path)) {
-                await this.assets.addAfa(path, file);
-                // Create a dummy file in the FS.
-                this.m.FS.writeFile(path, new Uint8Array());
-            } else if (/\.dlf$/i.test(path)) {
-                await this.assets.addDlf(path, file);
-            } else if (basename(path).toLowerCase() === 'reigndata.red') {
-                await this.assets.addAar(path, file);
-            } else if (/\.(alm|mpg|fnl)$/i.test(path)) {
-                this.nonResidentFiles.set(path, file);
-                // Create a dummy file in the FS.
-                this.m.FS.writeFile(path, new Uint8Array());
-            } else {
-                this.m.FS.writeFile(path, new Uint8Array(await file.arrayBuffer()));
-                const time = file.lastModified;
-                this.m.FS.utime(path, time, time);
-            }
-        }
-
-        for (const [type, files] of alds) {
-            await this.assets.addAld(type, files);
+            this.m.FS.writeFile(path, new Uint8Array(await file.arrayBuffer()));
+            const time = file.lastModified;
+            this.m.FS.utime(path, time, time);
         }
     }
 
@@ -200,12 +167,6 @@ export class Shell {
 
     get_audio_dest_node(): AudioNode {
         return this.audio.getDestNode();
-    }
-
-    async load_nonresident_file(path: string): Promise<Uint8Array | null> {
-        const file = this.nonResidentFiles.get(path);
-        if (!file) return null;
-        return new Uint8Array(await file.arrayBuffer());
     }
 
     private fsyncTimer: number | undefined;
