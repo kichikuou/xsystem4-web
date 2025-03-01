@@ -4,7 +4,7 @@
 import { dictionary } from './strings.js';
 import { $, OPFS_GAMEDIR, addToast, dirname, loadGameIni, registerErrorHandlers } from './utils.js';
 import * as zip from './zip.js';
-import type { InstallerWorkerRequest, InstallerWorkerResponse } from './worker/installer_worker.js';
+import { OPFSWriter } from './opfs_writer.js';
 
 $('#file-picker').addEventListener('change', async (evt: Event) => {
     const files = (evt.target as HTMLInputElement).files!;
@@ -27,7 +27,7 @@ export async function InstallFromZip(zipFile: File) {
     }
 
     const progress = new InstallProgress(files.reduce((sum, f) => sum + f.uncompressedSize, 0));
-    const worker = new InstallerWorker((_, n) => progress.increase(n));
+    const opfs_writer = new OPFSWriter((_, n) => progress.increase(n));
 
     // Clear previous installation if exists.
     try {
@@ -47,7 +47,7 @@ export async function InstallFromZip(zipFile: File) {
         let retryCount = 0;
         while (true) {
             try {
-                await worker.writeZipFile(path, file);
+                await opfs_writer.writeZipFile(path, file);
                 break;
             } catch (e) {
                 gtag('event', 'InstallWorkerError', { Message: e, RetryCount: retryCount });
@@ -90,48 +90,6 @@ class InstallProgress {
         $('#game-start').hidden = false;
     }
 }
-
-class InstallerWorker {
-    private worker: Worker;
-    private resolvers: Map<string, { resolve: (name: string) => void, reject: (err: any) => void }> = new Map();
-
-    constructor(private progressCallback: (path: string, value: number) => void) {
-        this.worker = new Worker('worker/installer_worker.js');
-        this.worker.addEventListener('message', (e) => this.onMessage(e.data));
-    }
-
-    private postMessage(msg: InstallerWorkerRequest, transfer: Transferable[] = []) {
-        this.worker.postMessage(msg, transfer);
-    }
-
-    private onMessage(msg: InstallerWorkerResponse) {
-        if (msg.command === 'progress') {
-            this.progressCallback(msg.path, msg.value);
-            return;
-        }
-        if (msg.error) {
-            this.resolvers.get(msg.path)!.reject(msg.error);
-        } else if (msg.command === 'write') {
-            this.resolvers.get(msg.path)!.resolve(msg.path);
-        }
-    }
-
-    async writeZipFile(path: string, file: zip.ZipFile) {
-        if (file.isEncrypted()) throw new Error('Encrypted ZIP files are not supported');
-        let compression: CompressionFormat | undefined;
-        switch (file.method) {
-            case 0: break;
-            case 8: compression = 'deflate-raw'; break;
-            default: throw new Error('Unsupported compression method: ' + file.method);
-        }
-        const data = await file.compressedData();
-        return new Promise<string>(async (res, rej) => {
-            this.resolvers.set(path, { resolve: res, reject: rej });
-            this.postMessage({ command: 'write', path, data, compression, crc32: file.crc32 });
-        });
-    }
-}
-
 registerErrorHandlers();
 
 const url = new URL(location.href);

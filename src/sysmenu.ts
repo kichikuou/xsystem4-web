@@ -1,10 +1,10 @@
 // Copyright (c) 2024 Kichikuou <KichikuouChrome@gmail.com>
 // Licensed under the MIT License. See the LICENSE file for details.
 
-import type { MainModule as XSys4Module } from './xsystem4.js';
 import { dictionary } from './strings.js';
-import { $, HOMEDIR, addToast, confirm } from './utils.js';
+import { $, OPFS_GAMEDIR, addToast, confirm } from './utils.js';
 import * as zip from './zip.js';
+import { OPFSWriter } from './opfs_writer.js';
 
 const dialog = $('#system-menu') as HTMLDialogElement;
 const msgskip = $('#msgskip') as HTMLInputElement;
@@ -26,9 +26,9 @@ for (const e of Array.from(dialog.children)) {
 $('.toast-container').addEventListener('click', (e) => e.stopPropagation());
 
 
-export function initSaveMenu(FS: XSys4Module['FS'], gameName: string) {
-    $('#export-save').addEventListener('click', () => exportSave(FS, gameName));
-    $('#import-save').addEventListener('click', () => importSave(FS, gameName));
+export function initSaveMenu(gameName: string) {
+    $('#export-save').addEventListener('click', () => exportSave(gameName));
+    $('#import-save').addEventListener('click', () => importSave(gameName));
 }
 
 export function open() {
@@ -42,24 +42,27 @@ dialog.addEventListener('close', () => {
     document.body.appendChild($('.toast-container'));
 });
 
-function exportSave(FS: XSys4Module['FS'], gameName: string) {
+async function exportSave(gameName: string) {
     const z = new zip.ZipBuilder();
-    function walk(dir: string) {
-        for (const name of FS.readdir(dir)) {
-            if (name[0] === '.') continue;
-            const path = dir + '/' + name;
-            const pathInZip = path.replace(`${HOMEDIR}/`, '');
-            const stat = FS.stat(path, false);
-            if (FS.isDir(stat.mode)) {
-                z.addDir(pathInZip, stat.mtime);
-                walk(path);
-            } else {
-                const data = FS.readFile(path);
-                z.addFile(pathInZip, data, stat.mtime);
+    async function walk(dir: FileSystemDirectoryHandle, pathInZip: string) {
+        for await (const e of dir.values()) {
+            const entryPathInZip = pathInZip + '/' + e.name;
+            if (e.kind === 'directory') {
+                z.addDir(entryPathInZip, new Date());
+                await walk(e as FileSystemDirectoryHandle, entryPathInZip);
+            } else if (e.kind === 'file') {
+                const file = await (e as FileSystemFileHandle).getFile();
+                const data = new Uint8Array(await file.arrayBuffer());
+                z.addFile(entryPathInZip, data, new Date(file.lastModified));
             }
         }
     }
-    walk(HOMEDIR);
+    const root = await navigator.storage.getDirectory();
+    const gameRoot = await root.getDirectoryHandle(OPFS_GAMEDIR, { create: false });
+    const saveDir = await gameRoot.getDirectoryHandle('SaveData', { create: false });
+    z.addDir(gameName, new Date());
+    z.addDir(gameName + '/SaveData', new Date());
+    await walk(saveDir, gameName + '/SaveData');
 
     downloadAs(URL.createObjectURL(z.build()), `${gameName}_save.zip`);
     gtag('event', 'ExportSave');
@@ -74,7 +77,7 @@ function downloadAs(url: string, filename: string) {
     setTimeout(() => { document.body.removeChild(elem); }, 5000);
 }
 
-async function importSave(FS: XSys4Module['FS'], gameName: string) {
+async function importSave(gameName: string) {
     const zipFile = await openFileInput();
     if (!zipFile) return;
     const files = await zip.load(zipFile);
@@ -82,17 +85,14 @@ async function importSave(FS: XSys4Module['FS'], gameName: string) {
         addToast(dictionary.not_savefiles_for(gameName), 'error');
         return;
     }
+    const opfs_writer = new OPFSWriter(() => {});
     for (const file of files) {
-        const path = '.xsystem4/' + file.name;
         if (file.name.endsWith('/')) {
-            try {
-                FS.mkdir(path, undefined);
-            } catch (e) {}
-        } else {
-            FS.writeFile(path, await file.extract());
+            continue;
         }
+        const path = file.name.replace(`${gameName}/`, `/${OPFS_GAMEDIR}/`);
+        await opfs_writer.writeZipFile(path, file);
     }
-    await new Promise<any>((res) => FS.syncfs(false, res));
     gtag('event', 'ImportSave');
     if (confirm(dictionary.saves_imported)) {
         window.shell.m._xsystem4_reset();

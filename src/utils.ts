@@ -7,7 +7,6 @@ import { dictionary } from './strings.js';
 export const $: (selector: string) => HTMLElement = document.querySelector.bind(document);
 
 export const OPFS_GAMEDIR = 'game';
-export const HOMEDIR = '/.xsystem4';
 
 export function registerErrorHandlers() {
     window.addEventListener('error', (evt: ErrorEvent) => {

@@ -2,7 +2,7 @@
 // Licensed under the MIT License. See the LICENSE file for details.
 
 import type { MainModule as XSys4Module } from './xsystem4.js';
-import { $, HOMEDIR, addToast, basename, isAppleDevice } from './utils.js';
+import { $, addToast, isAppleDevice } from './utils.js';
 import { Audio } from './audio.js';
 import { HllValidator } from './hll_validator.js';
 import { InputString } from './input.js';
@@ -18,11 +18,11 @@ declare global {
     var shell: XSys4Shell;
 }
 
-const GAMEDIR = '/game';
+const GAMEDIR = '/opfs/game';
 
 async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
     const module: any = {
-        arguments: ['--save-format=rsm', GAMEDIR],
+        arguments: ['--save-format=rsm', `--save-folder=${GAMEDIR}/SaveData`, GAMEDIR],
         canvas: document.getElementById('canvas') as HTMLCanvasElement,
         preRun: [] as (() => void)[],
     };
@@ -53,66 +53,30 @@ async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
     return xsystem4_factory(module);
 }
 
-export type GameFile = { path: string, file: File };
-
 export class Shell {
     m: XSys4Module & { arguments?: string[] };
     private audio = new Audio();
     input = new InputString();
+    private fonts: { path: string, file: Uint8Array }[] = [];
 
-    constructor(files: AsyncGenerator<GameFile>) {
+    constructor() {
         document.documentElement.setAttribute('data-theme', 'dark');
         create_xsystem4(async (module) => {
             this.m = module;
             (module as any).shell = this;  // Enable C code to access this object.
-            await Promise.all([
-                this.loadGameFiles(files),
-                this.loadFonts(),
-                this.setupSaveDir(),
-            ]);
+            await this.loadFonts();
             $('#spinner')?.remove();
             window.onbeforeunload = (e: BeforeUnloadEvent) => e.returnValue = 'Any unsaved progress will be lost.';
         });
     }
 
-    // Load files into Emscripten virtual filesystem.
-    private async loadGameFiles(files: AsyncGenerator<GameFile>) {
-        for await (let { path, file } of files) {
-            // Skip files unnecessary for us.
-            if (/\.(exe|inc|dll)$/i.test(path)) continue;
-
-            // Normalize the name to NFC to avoid issues with decomposed dakuon
-            // characters (e.g. 'が' (\u304C) -> 'が' (\u304B\u3099)) on macOS.
-            path = path.normalize('NFC');
-
-            path = `${GAMEDIR}/${path}`;
-
-            const dir = path.replace(/\/[^/]+$/, '');
-            this.m.FS.mkdirTree(dir, undefined);
-
-            this.m.FS.writeFile(path, new Uint8Array(await file.arrayBuffer()));
-            const time = file.lastModified;
-            this.m.FS.utime(path, time, time);
-        }
-    }
-
-    private async setupSaveDir() {
-        this.m.ENV['XSYSTEM4_HOME'] = HOMEDIR;
-        this.m.FS.mkdir(HOMEDIR, undefined);
-        this.m.FS.mount(this.m.FS.filesystems.IDBFS, { autoPersist: true }, HOMEDIR);
-        await new Promise<any>((res) => this.m.FS.syncfs(true, res));
-    }
-
     private async loadFonts() {
-        this.m.FS.mkdir('/fonts', undefined);
         const gothic = 'fonts/VL-Gothic-Regular-SJIS.ttf';
         const mincho = 'fonts/HanaMinA-SJIS.ttf';
         for (const font of [gothic, mincho]) {
             const resp = await fetch(font);
             const buffer = new Uint8Array(await resp.arrayBuffer());
-            if (buffer) {
-                this.m.FS.writeFile(font, buffer);
-            }
+            this.fonts.push({ path: font, file: buffer });
         }
         this.m.arguments!.push('--font-gothic', gothic);
         this.m.arguments!.push('--font-mincho', mincho);
@@ -126,6 +90,7 @@ export class Shell {
 
     set_title(title: string) {
         document.title = title + ' - xsystem4';
+        sysmenu.initSaveMenu(title);
         gtag('event', 'GameStart', { Title: title });
     }
 
@@ -137,47 +102,16 @@ export class Shell {
         addToast(dictionary.error_occurred + '\n' + msg, 'error');
     }
 
-    init_save(gameName: string, saveDir: string) {
-        sysmenu.initSaveMenu(this.m.FS, gameName);
-
-        // Import save files from the user-provided game data.
-        const src = `${GAMEDIR}/${saveDir}`;
-        const dest = `${HOMEDIR}/${gameName}/${saveDir}`;
-        try {
-            if (!this.m.FS.isDir(this.m.FS.stat(src, undefined).mode))
-                return;
-            this.m.FS.mkdir(`${HOMEDIR}/${gameName}`, undefined);
-            this.m.FS.mkdir(dest, undefined);
-        } catch (e) {
-            // `src` doesn't exist, or xsystem4 saves already exist.
-            return;
-        }
-        try {
-            for (const name of this.m.FS.readdir(src)) {
-                const stat = this.m.FS.stat(`${src}/${name}`, undefined);
-                if (this.m.FS.isDir(stat.mode)) continue;
-                this.m.FS.writeFile(`${dest}/${name}`, this.m.FS.readFile(`${src}/${name}`));
-                this.m.FS.utime(`${dest}/${name}`, stat.atime, stat.mtime);
-            }
-            this.schedule_syncfs();
-        } catch (e) {
-            console.warn(e);
-        }
+    init_filesystem() {
+        this.m.FS.mkdir('/fonts', undefined);
+        this.fonts.forEach(({ path, file }) => {
+            this.m.FS.writeFile(path, file);
+        });
+        this.fonts = [];
     }
 
     get_audio_dest_node(): AudioNode {
         return this.audio.getDestNode();
-    }
-
-    private fsyncTimer: number | undefined;
-    schedule_syncfs(timeout = 100) {
-        window.clearTimeout(this.fsyncTimer);
-        this.fsyncTimer = window.setTimeout(() => {
-            this.m.FS.syncfs(false, (err) => {
-                if (err)
-                    console.warn(`syncfs failed: ${err}`);
-            });
-        }, timeout);
     }
 
     open_system_menu() {
