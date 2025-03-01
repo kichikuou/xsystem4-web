@@ -33,7 +33,11 @@ async function write(req: WriteRequest) {
         stream = stream.pipeThrough(new DecompressionStream(req.compression));
     }
 
-    const file = await createFile(req.path);
+    // Normalize the name to NFC to avoid issues with decomposed dakuon
+    // characters (e.g. 'が' (\u304C) -> 'が' (\u304B\u3099)) on macOS.
+    const path = req.path.normalize('NFC');
+
+    const file = await createFile(path);
     // Since Safari doesn't support FileSystemFileHandle.createWritable(),
     // we need to use sync access to write the file.
     const handle = await file.createSyncAccessHandle();
