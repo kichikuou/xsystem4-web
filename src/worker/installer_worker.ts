@@ -5,7 +5,7 @@
 // This is necessary because OPFS is not writable from the main thread in Safari.
 import { crc32 } from '../zip.js';
 
-type WriteRequest = { command: 'write', path: string, data: Blob, compression?: CompressionFormat, crc32: number };
+type WriteRequest = { command: 'write', path: string, data: Blob, compression?: CompressionFormat, crc32?: number };
 
 export type InstallerWorkerRequest = WriteRequest;
 
@@ -45,7 +45,7 @@ async function write(req: WriteRequest) {
         reader.read().then(function processChunk({ done, value }) {
             if (done) {
                 handle.close();
-                if (~crc !== req.crc32) {
+                if (req.crc32 && ~crc !== req.crc32) {
                     reject(new Error('CRC32 mismatch'));
                     return;
                 }

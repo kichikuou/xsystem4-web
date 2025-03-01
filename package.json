@@ -14,6 +14,7 @@
     "esbuild": "^0.20.2"
   },
   "dependencies": {
+    "@irori/idbfs": "^0.4.0",
     "@picocss/pico": "^2.0.6",
     "@types/gtag.js": "^0.0.19",
     "binaryen": "^116.0.0",

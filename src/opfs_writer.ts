@@ -26,6 +26,13 @@ export class OPFSWriter {
         }
     }
 
+    async writeFile(path: string, content: BlobPart) {
+        return new Promise<string>(async (res, rej) => {
+            this.resolvers.set(path, { resolve: res, reject: rej });
+            this.postMessage({ command: 'write', path, data: new Blob([content]) });
+        });
+    }
+
     async writeZipFile(path: string, file: zip.ZipFile) {
         if (file.isEncrypted()) throw new Error('Encrypted ZIP files are not supported');
         let compression: CompressionFormat | undefined;
