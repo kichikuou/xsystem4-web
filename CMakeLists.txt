@@ -26,6 +26,18 @@ set(COMMON_CMAKE_ARGS
   -DCMAKE_C_FLAGS=${COMMON_CFLAGS}
 )
 
+ExternalProject_Add(
+  libffi
+  URL https://github.com/libffi/libffi/releases/download/v3.4.7/libffi-3.4.7.tar.gz
+  URL_HASH SHA1=b07136211f47fa30c0512ebd7484fde724978d99
+  CONFIGURE_COMMAND emconfigure <SOURCE_DIR>/configure
+                      --host=wasm32-unknown-emscripten
+                      --prefix=${stagingDir}
+                      --disable-shared
+  BUILD_COMMAND emmake make
+  INSTALL_COMMAND emmake make install
+)
+
 # libogg and libvorbis are available as emscripten ports, but we build them
 # so that libsndfile can find them.
 ExternalProject_Add(
@@ -125,4 +137,4 @@ ExternalProject_Add(
   )
 
 ExternalProject_Add_StepDependencies(xsystem4 configure
-  libjpeg-turbo libwebp libsndfile)
+  libffi libjpeg-turbo libwebp libsndfile)
