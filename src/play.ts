@@ -39,15 +39,21 @@ async function migrateSaveFiles() {
     const opfs_writer = new OPFSWriter(() => {});
     for (const saveRoot of fs.readdir(HOMEDIR)) {
         if (saveRoot.startsWith('.')) continue;
-        const saveDir = HOMEDIR + '/' + saveRoot + '/SaveData';
-        for (const fname of fs.readdir(saveDir)) {
-            if (fname.startsWith('.')) continue;
-            const idbfsPath = saveDir + '/' + fname;
-            const opfsPath = '/game/SaveData/' + fname;
-            const data = fs.readFile(idbfsPath, { encoding: 'binary' });
-            console.log('Migrating save file:', idbfsPath, '->', opfsPath);
-            await opfs_writer.writeFile(opfsPath, data);
+        const copyRecursively = async (idbfsDir: string, opfsDir: string) => {
+            for (const fname of fs.readdir(idbfsDir)) {
+                if (fname.startsWith('.')) continue;
+                const idbfsPath = idbfsDir + '/' + fname;
+                const opfsPath = opfsDir + '/' + fname;
+                if (fs.isDir(fs.stat(idbfsPath, undefined).mode)) {
+                    await copyRecursively(idbfsPath, opfsPath);
+                } else {
+                    const data = fs.readFile(idbfsPath, { encoding: 'binary' });
+                    console.log('Migrating save file:', idbfsPath, '->', opfsPath);
+                    await opfs_writer.writeFile(opfsPath, data);
+                }
+            }
         }
+        await copyRecursively(HOMEDIR + '/' + saveRoot + '/SaveData', '/game/SaveData');
     }
     localStorage.setItem('savefile_migrated', 'true');
 }
