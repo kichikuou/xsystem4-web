@@ -44,7 +44,7 @@ async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
         // Workaround for https://bugs.webkit.org/show_bug.cgi?id=255103
         module.wasmMemory = new WebAssembly.Memory({
             initial:  64 * 1024 * 1024 / 65536,
-            maximum: 256 * 1024 * 1024 / 65536,
+            maximum: 512 * 1024 * 1024 / 65536,
             shared: true
         });
     }
