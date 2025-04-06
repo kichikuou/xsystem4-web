@@ -24,7 +24,6 @@ set(COMMON_CMAKE_ARGS
   -DCMAKE_STAGING_PREFIX:PATH=${stagingDir}
   -DCMAKE_INSTALL_PREFIX:PATH=${stagingDir}
   -DCMAKE_C_FLAGS=${COMMON_CFLAGS}
-  -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 )
 
 ExternalProject_Add(
@@ -46,6 +45,7 @@ ExternalProject_Add(
   URL https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz
   URL_HASH SHA1=5a368421a636f7faa4c2f662857cb507dffd7c99
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 )
 
 ExternalProject_Add(
@@ -53,6 +53,7 @@ ExternalProject_Add(
   URL https://github.com/xiph/vorbis/releases/download/v1.3.7/libvorbis-1.3.7.tar.xz
   URL_HASH SHA1=0a2dd71a999656b8091506839e8007a61a8fda1f
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 )
 
 ExternalProject_Add_StepDependencies(libvorbis configure libogg)
@@ -79,8 +80,8 @@ ExternalProject_Add_StepDependencies(flac configure libogg)
 
 ExternalProject_Add(
   opus
-  URL https://github.com/xiph/opus/releases/download/v1.4/opus-1.4.tar.gz
-  URL_HASH SHA1=c53b3a74fc26fb2c2314afe958be30d169bd029a
+  URL https://downloads.xiph.org/releases/opus/opus-1.5.2.tar.gz
+  URL_HASH SHA256=65c1d2f78b9f2fb20082c38cbe47c951ad5839345876e46941612ee87f9a7ce1
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
              -DOPUS_HARDENING=OFF
              -DOPUS_STACK_PROTECTOR=OFF
@@ -89,8 +90,8 @@ ExternalProject_Add(
 
 ExternalProject_Add(
   libjpeg-turbo
-  URL https://sourceforge.net/projects/libjpeg-turbo/files/2.1.2/libjpeg-turbo-2.1.2.tar.gz/download
-  URL_HASH SHA1=65c51c543b1fbba6db9ff5bee474ccb0b52a929f
+  URL https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.0/libjpeg-turbo-3.1.0.tar.gz
+  URL_HASH SHA1=ba3c0152f14a504018de19c9f62250d8f3351525
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
              -DENABLE_SHARED=OFF
 )
@@ -119,6 +120,7 @@ ExternalProject_Add(
   URL https://github.com/libsndfile/libsndfile/releases/download/1.0.31/libsndfile-1.0.31.tar.bz2
   URL_HASH SHA1=f16a88e7223baef7c4497536dc1b55b56811debc
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
              -DBUILD_SHARED_LIBS=OFF
              -DBUILD_PROGRAMS=OFF
              -DBUILD_EXAMPLES=OFF
@@ -132,6 +134,7 @@ ExternalProject_Add(
   xsystem4
   SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/xsystem4
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+              -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}/cmake
               -DXSYSTEM4_INSTALL_DIR=${CMAKE_CURRENT_LIST_DIR}/dist
               -DXSYSTEM4_TS_INSTALL_DIR=${CMAKE_CURRENT_LIST_DIR}/src
   BUILD_ALWAYS YES
