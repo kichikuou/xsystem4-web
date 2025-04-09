@@ -11,11 +11,7 @@ include(ExternalProject)
 
 set(stagingDir ${CMAKE_CURRENT_BINARY_DIR}/stage)
 
-# XXX: We don't really need pthreads, but SDL2 and libpng of Emscripten Ports
-#      currently don't support WASM_WORKERS && !pthreads.
-# https://github.com/emscripten-core/emscripten/issues/19667
-# https://github.com/emscripten-core/emscripten/pull/18379
-set(COMMON_CFLAGS "-sWASM_WORKERS=1 -pthread")
+set(COMMON_CFLAGS "-sWASM_WORKERS=1 -pthread --use-port=ogg --use-port=vorbis --use-port=libpng")
 
 set(COMMON_CMAKE_ARGS
   -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -38,31 +34,12 @@ ExternalProject_Add(
   INSTALL_COMMAND emmake make install
 )
 
-# libogg and libvorbis are available as emscripten ports, but we build them
-# so that libsndfile can find them.
-ExternalProject_Add(
-  libogg
-  URL https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5.tar.xz
-  URL_HASH SHA1=5a368421a636f7faa4c2f662857cb507dffd7c99
-  CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-)
-
-ExternalProject_Add(
-  libvorbis
-  URL https://github.com/xiph/vorbis/releases/download/v1.3.7/libvorbis-1.3.7.tar.xz
-  URL_HASH SHA1=0a2dd71a999656b8091506839e8007a61a8fda1f
-  CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
-)
-
-ExternalProject_Add_StepDependencies(libvorbis configure libogg)
-
 ExternalProject_Add(
   flac
   URL https://github.com/xiph/flac/releases/download/1.4.3/flac-1.4.3.tar.xz
   URL_HASH SHA256=6c58e69cd22348f441b861092b825e591d0b822e106de6eb0ee4d05d27205b70
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+             -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}/cmake
              -DBUILD_CXXLIBS=OFF
              -DBUILD_PROGRAMS=OFF
              -DBUILD_EXAMPLES=OFF
@@ -75,8 +52,6 @@ ExternalProject_Add(
   BUILD_COMMAND cmake --build <BINARY_DIR> --target FLAC
   INSTALL_COMMAND
 )
-
-ExternalProject_Add_StepDependencies(flac configure libogg)
 
 ExternalProject_Add(
   opus
@@ -120,6 +95,7 @@ ExternalProject_Add(
   URL https://github.com/libsndfile/libsndfile/releases/download/1.0.31/libsndfile-1.0.31.tar.bz2
   URL_HASH SHA1=f16a88e7223baef7c4497536dc1b55b56811debc
   CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+             -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_LIST_DIR}/cmake
              -DCMAKE_POLICY_VERSION_MINIMUM=3.5
              -DBUILD_SHARED_LIBS=OFF
              -DBUILD_PROGRAMS=OFF
@@ -128,7 +104,7 @@ ExternalProject_Add(
              -DENABLE_CPACK=OFF
   )
 
-ExternalProject_Add_StepDependencies(libsndfile configure libvorbis flac opus)
+ExternalProject_Add_StepDependencies(libsndfile configure flac opus)
 
 ExternalProject_Add(
   xsystem4
