@@ -102,6 +102,11 @@ export class Shell {
         addToast(dictionary.error_occurred + '\n' + msg, 'error');
     }
 
+    report_error(msg: string) {
+        console.error(msg);
+        gtag('event', 'XSys4Error', { Message: msg });
+    }
+
     init_filesystem() {
         this.m.FS.mkdir('/fonts', undefined);
         this.fonts.forEach(({ path, file }) => {
