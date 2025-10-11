@@ -8,7 +8,7 @@ name: Deploy to Firebase Hosting on merge
       - main
 
 env:
-  EM_VERSION: 4.0.11
+  EM_VERSION: 4.0.16
   EM_CACHE_FOLDER: 'emsdk-cache'
 
 jobs:
