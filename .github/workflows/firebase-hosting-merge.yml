@@ -31,7 +31,10 @@ jobs:
           version: ${{env.EM_VERSION}}
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
       - name: Build
-        run: npm ci && npm run build
+        run: |
+          npm ci
+          npm run build
+          npm run type
         env:
           CMAKE_GENERATOR: Ninja
       - name: Deploy
