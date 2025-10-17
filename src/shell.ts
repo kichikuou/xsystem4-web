@@ -4,7 +4,6 @@
 import type { MainModule as XSys4Module } from './xsystem4.js';
 import { $, addToast, isAppleDevice } from './utils.js';
 import { Audio } from './audio.js';
-import { HllValidator } from './hll_validator.js';
 import { InputString } from './input.js';
 import { dictionary } from './strings.js';
 import * as sysmenu from './sysmenu.js';
@@ -121,16 +120,6 @@ export class Shell {
 
     open_system_menu() {
         sysmenu.open();
-    }
-
-    private hll_validator: HllValidator | undefined;
-    async init_hll_validator(): Promise<number> {
-        this.hll_validator = await HllValidator.create();
-        return 1;
-    }
-
-    validate_hll_signature(lib: string, name: string, func: number, sig: string) {
-        this.hll_validator!.validate(lib, name, func, sig);
     }
 }
 

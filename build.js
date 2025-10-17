@@ -7,21 +7,8 @@ import { makeSjisSubset } from './font-subset.js';
 const logLevel = 'info';
 const outdir = 'dist';
 
-// An esbuild plugin that rewrites module specifiers for the external modules.
-const resolveExternalModules = {
-    name: 'resolveExternalModules',
-    setup(build) {
-        build.onResolve({ filter: /^[^.]/ }, async (args) => {
-            switch (args.path) {
-                case 'binaryen': return { path: './lib/binaryen.js', external: true };
-            }
-        })
-    },
-}
-
 async function installExternalModules() {
     return Promise.all([
-        fsPromises.copyFile('node_modules/binaryen/index.js', 'dist/lib/binaryen.js'),
         fsPromises.copyFile('node_modules/@picocss/pico/css/pico.min.css', 'dist/lib/pico.min.css'),
     ]);
 }
@@ -63,7 +50,6 @@ async function runServer(ctx) {
 const configs = [
     {
         entryPoints: ['src/index.ts', 'src/install.ts', 'src/play.ts', 'src/worker/installer_worker.ts'],
-        plugins: [resolveExternalModules],
         bundle: true,
         external: ['./xsystem4.js'],
         minify: true,

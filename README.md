@@ -49,4 +49,3 @@ The source code in this repository is licensed under the [MIT License](LICENSE).
 This site also uses the following open-source software:
 - [Pico](https://picocss.com/) ([MIT License](https://github.com/picocss/pico/blob/v2.0.6/LICENSE.md))
 - [Tabler Icons](https://tabler.io/icons) ([MIT License](https://tabler.io/license))
-- [binaryen.js](https://github.com/AssemblyScript/binaryen.js) ([Apache License 2.0](https://github.com/AssemblyScript/binaryen.js/blob/v116.0.0/LICENSE))
