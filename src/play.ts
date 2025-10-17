@@ -24,7 +24,7 @@ if (localStorage.getItem('installed') !== 'true') {
     $('#spinner').remove();
 } else {
     await migrateSaveFiles();
-    window.shell = new Shell();
+    window.shell = await Shell.create();
     persistStorage();
 }
 

@@ -53,20 +53,23 @@ async function create_xsystem4(preRun : (m : XSys4Module) => Promise<void>) {
 }
 
 export class Shell {
-    m: XSys4Module & { arguments?: string[] };
     private audio = new Audio();
     input = new InputString();
     private fonts: { path: string, file: Uint8Array }[] = [];
 
-    constructor() {
+    private constructor(public m: XSys4Module & { arguments?: string[] }) {}
+
+    static async create(): Promise<Shell> {
         document.documentElement.setAttribute('data-theme', 'dark');
-        create_xsystem4(async (module) => {
-            this.m = module;
-            (module as any).shell = this;  // Enable C code to access this object.
-            await this.loadFonts();
+        let shell: Shell;
+        await create_xsystem4(async (module) => {
+            shell = new Shell(module);
+            (module as any).shell = shell;  // Enable C code to access this object.
+            await shell.loadFonts();
             $('#spinner')?.remove();
             window.onbeforeunload = (e: BeforeUnloadEvent) => e.returnValue = 'Any unsaved progress will be lost.';
         });
+        return shell!;
     }
 
     private async loadFonts() {
