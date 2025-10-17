@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "lib": ["ES2023", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
+        "noEmit": true,
+        "module": "es2022",
+        "moduleResolution": "Bundler",
+        "isolatedModules": true,
+        "esModuleInterop": true,
+    },
+    "files": [
+        "index.ts",
+        "install.ts",
+        "play.ts"
+    ]
+}

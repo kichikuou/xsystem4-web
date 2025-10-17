@@ -4,14 +4,11 @@
 // A worker that writes files to OPFS.
 // This is necessary because OPFS is not writable from the main thread in Safari.
 import { crc32 } from '../zip.js';
+import type { InstallerWorkerRequest, InstallerWorkerResponse, WriteRequest } from './messages.js';
 
-type WriteRequest = { command: 'write', path: string, data: Blob, compression?: CompressionFormat, crc32?: number };
-
-export type InstallerWorkerRequest = WriteRequest;
-
-export type InstallerWorkerResponse =
-    { path: string, command: 'write', error: string | null }
-  | { path: string, command: 'progress', value: number };
+function postMessage(msg: InstallerWorkerResponse) {
+    self.postMessage(msg);
+}
 
 onmessage = async (e: MessageEvent) => {
     const req: InstallerWorkerRequest = e.data;
@@ -23,7 +20,11 @@ onmessage = async (e: MessageEvent) => {
         }
         postMessage({ path: req.path, command: req.command, error: null });
     } catch (e) {
-        postMessage({ path: req.path, command: req.command, error: e.message });
+        if (e instanceof Error) {
+            postMessage({ path: req.path, command: req.command, error: e.message });
+        } else {
+            postMessage({ path: req.path, command: req.command, error: 'Unknown error' });
+        }
     }
 };
 
@@ -67,10 +68,10 @@ async function write(req: WriteRequest) {
 // Since Blob::stram() in WebKit does not have a backpressure mechanism, using
 // it with a large file can cause memory exhaustion. This function creates a
 // ReadableStream that reads a blob in pull mode.
-function createBlobStream(blob: Blob): ReadableStream<Uint8Array> {
+function createBlobStream(blob: Blob): ReadableStream<Uint8Array<ArrayBuffer>> {
     // return data.stream();
     let offset = 0;
-    return new ReadableStream<Uint8Array>({
+    return new ReadableStream<Uint8Array<ArrayBuffer>>({
         async pull(controller) {
             if (offset >= blob.size) {
                 controller.close();

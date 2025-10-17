@@ -73,7 +73,7 @@ export function dirname(path: string): string {
     return path.replace(/\/[^/]*$/, '');
 }
 
-export function concatBuffers(parts: Uint8Array[]): Uint8Array {
+export function concatBuffers(parts: Uint8Array<ArrayBuffer>[]): Uint8Array<ArrayBuffer> {
     const result = new Uint8Array(parts.reduce((sum, p) => sum + p.byteLength, 0));
     let pos = 0;
     for (const part of parts) {

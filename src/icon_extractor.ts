@@ -7,7 +7,7 @@ import { concatBuffers } from './utils.js';
 const RT_ICON = 3
 const RT_GROUP_ICON = 14
 
-export function extractIconFromExe(exe: ArrayBuffer): Uint8Array | null {
+export function extractIconFromExe(exe: ArrayBuffer): Uint8Array<ArrayBuffer> | null {
     const extractor = createIconExtractor(exe);
     if (!extractor) return null;
     return extractor.extractIcon();
@@ -45,7 +45,7 @@ function createIconExtractor(exe: ArrayBuffer): IconExtractor | null {
 }
 
 class IconExtractor {
-    constructor(private data: Uint8Array, private rvaDelta: number) {}
+    constructor(private data: Uint8Array<ArrayBuffer>, private rvaDelta: number) {}
 
     getView(): DataView {
         return new DataView(this.data.buffer, this.data.byteOffset, this.data.byteLength);
@@ -59,7 +59,7 @@ class IconExtractor {
         return this.getRoot().getDirectory(type);
     }
 
-    getResource(offset: number): Uint8Array {
+    getResource(offset: number): Uint8Array<ArrayBuffer> {
         const v = this.getView();
         const offsetInFile = v.getUint32(offset, true) - this.rvaDelta;
         const size = v.getUint32(offset + 4, true);
@@ -68,7 +68,7 @@ class IconExtractor {
 
     // Reconstruct an icon file from RT_GROUP_ICON / RT_ICON resources.
     // https://devblogs.microsoft.com/oldnewthing/20120720-00/?p=7083
-    extractIcon(): Uint8Array | null {
+    extractIcon(): Uint8Array<ArrayBuffer> | null {
         const iconResources = this.getDirectory(RT_ICON);
         if (!iconResources) return null;
         const grpIconBytes = this.getDirectory(RT_GROUP_ICON)?.getFirstResource();
@@ -129,7 +129,7 @@ class ResourceDirectory {
         return null;
     }
 
-    getResource(nameOrId: number): Uint8Array | null {
+    getResource(nameOrId: number): Uint8Array<ArrayBuffer> | null {
         for (const e of this.entries) {
             if (e.nameOrId === nameOrId && !e.isDirectory) {
                 return this.e.getResource(e.ofs);
@@ -138,7 +138,7 @@ class ResourceDirectory {
         return null;
     }
 
-    getFirstResource(): Uint8Array | null {
+    getFirstResource(): Uint8Array<ArrayBuffer> | null {
         if (this.entries[0].isDirectory) {
             return new ResourceDirectory(this.e, this.entries[0].ofs).getFirstResource();
         }

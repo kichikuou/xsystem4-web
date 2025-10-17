@@ -1,5 +1,11 @@
 {
     "compilerOptions": {
-        "lib": ["esnext", "webworker"],
+        "lib": ["ES2023", "webworker"],
+        "noEmit": true,
+        "strict": true,
+        "module": "es2022",
+        "moduleResolution": "Bundler",
+        "isolatedModules": true,
+        "esModuleInterop": true,
     }
 }

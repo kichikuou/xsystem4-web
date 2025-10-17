@@ -30,7 +30,7 @@ export async function handleZip(zipFile: File) {
         return;
     }
 
-    let icon: Uint8Array | null = null;
+    let icon: Uint8Array<ArrayBuffer> | null = null;
     // Find an .ico file.
     const iniDir = dirname(ini.iniPath);
     const iconFile = files.find(f => dirname(f.name) === iniDir && f.name.toLowerCase().endsWith('.ico'));
@@ -56,7 +56,7 @@ export async function handleZip(zipFile: File) {
     ($('#add-to-home-screen') as HTMLDialogElement).showModal();
 }
 
-async function generateManifest(title: string, icon: Uint8Array | null) {
+async function generateManifest(title: string, icon: Uint8Array<ArrayBuffer> | null) {
     if (icon) {
         await new Promise<void>((res, rej) => {
             const blob = new Blob([icon], { type: 'image/x-icon' });

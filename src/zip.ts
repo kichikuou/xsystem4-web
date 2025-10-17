@@ -83,7 +83,7 @@ export class ZipFile {
         return this.file.slice(compressedDataOffset, compressedDataOffset + this.compressedSize);
     }
 
-    async extract(): Promise<Uint8Array> {
+    async extract(): Promise<Uint8Array<ArrayBuffer>> {
         if (this.isEncrypted()) throw new ZipError('Encrypted ZIP files are not supported');
         if (this.method === METHOD_STORE) {
             return new Uint8Array(await (await this.compressedData()).arrayBuffer());
@@ -130,11 +130,11 @@ export async function load(file: Blob): Promise<ZipFile[]> {
 }
 
 export class ZipBuilder {
-    private entries: Uint8Array[] = [];
-    private centralDirectory: Uint8Array[] = [];
+    private entries: Uint8Array<ArrayBuffer>[] = [];
+    private centralDirectory: Uint8Array<ArrayBuffer>[] = [];
     private offset = 0;
 
-    addFile(path: string, data: Uint8Array, mtime: Date) {
+    addFile(path: string, data: Uint8Array<ArrayBuffer>, mtime: Date) {
         const dosTime = (mtime.getSeconds() >> 1) | (mtime.getMinutes() << 5) | (mtime.getHours() << 11);
         const dosDate = mtime.getDate() | ((mtime.getMonth() + 1) << 5) | ((mtime.getFullYear() - 1980) << 9);
         const crc = ~crc32(data);

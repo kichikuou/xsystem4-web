@@ -1,5 +1,5 @@
 import * as zip from './zip.js';
-import type { InstallerWorkerRequest, InstallerWorkerResponse } from './worker/installer_worker.js';
+import type { InstallerWorkerRequest, InstallerWorkerResponse } from './worker/messages.js';
 
 export class OPFSWriter {
     private worker: Worker;

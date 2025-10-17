@@ -5,13 +5,15 @@
   "repository": "github:kichikuou/xsystem4-web",
   "type": "module",
   "scripts": {
+    "type": "(cd src && tsc) && (cd src/worker && tsc)",
     "build": "./build-wasm.sh && node build.js",
     "serve": "node build.js --serve",
     "watch": "node build.js --watch"
   },
   "author": "kichikuou <KichikuouChrome@gmail.com>",
   "devDependencies": {
-    "esbuild": "^0.20.2"
+    "esbuild": "^0.20.2",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@irori/idbfs": "^0.4.0",
