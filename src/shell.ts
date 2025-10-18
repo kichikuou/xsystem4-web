@@ -7,6 +7,7 @@ import { Audio } from './audio.js';
 import { InputString } from './input.js';
 import { dictionary } from './strings.js';
 import * as sysmenu from './sysmenu.js';
+import * as manual from './manual.js';
 
 export interface XSys4Shell {
     m: XSys4Module;
@@ -123,6 +124,10 @@ export class Shell {
 
     open_system_menu() {
         sysmenu.open();
+    }
+
+    open_playing_manual() {
+        manual.open();
     }
 }
 

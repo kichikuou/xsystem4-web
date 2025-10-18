@@ -33,9 +33,11 @@ async function runServer(ctx) {
 
         // Forward each incoming request to esbuild
         const proxyReq = http.request(options, proxyRes => {
-            // Add COOP and COEP headers to the response from esbuild
-            proxyRes.headers['Cross-Origin-Opener-Policy'] = 'same-origin';
-            proxyRes.headers['Cross-Origin-Embedder-Policy'] = 'require-corp';
+            if (req.url !== '/service-worker.js') {
+                // Add COOP and COEP headers to the response from esbuild
+                proxyRes.headers['Cross-Origin-Opener-Policy'] = 'same-origin';
+                proxyRes.headers['Cross-Origin-Embedder-Policy'] = 'require-corp';
+            }
             // Forward the response to the client
             res.writeHead(proxyRes.statusCode, proxyRes.headers)
             proxyRes.pipe(res, { end: true })
