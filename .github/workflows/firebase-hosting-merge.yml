@@ -15,18 +15,18 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
       - run: sudo apt install ninja-build
       - name: Setup cache
         id: cache-system-libraries
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{env.EM_CACHE_FOLDER}}
           key: ${{env.EM_VERSION}}-${{ runner.os }}
       - name: Setup Emscripten toolchain
-        uses: mymindstorm/setup-emsdk@v14
+        uses: pyodide/setup-emsdk@ca2dd8aef8c2a0e11743c5c36f0b430ddb694b5c  # v15
         with:
           version: ${{env.EM_VERSION}}
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
