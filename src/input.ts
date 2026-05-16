@@ -30,17 +30,16 @@ export class InputString {
         });
     }
 
-    ClearResultString() {
-        this.input.value = '';
-    }
-
     GetResultString() {
         if (this.compositing) {
             return '';
         }
         const s = this.input.value;
-        this.input.value = '';
         return s;
+    }
+
+    SetResultString(s: string) {
+        this.input.value = s;
     }
 
     SetFont(size: number, name: string, weight: number) {
