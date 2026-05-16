@@ -88,6 +88,9 @@ canvas.emscripten {
     margin: 0;
     padding: 0;
     cursor: default;
+    /* The game draws its own caret sprite at the input position. */
+    caret-color: transparent;
+    outline: none;
 }
 
 #manual-viewer header {
