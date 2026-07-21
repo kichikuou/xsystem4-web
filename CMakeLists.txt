@@ -104,6 +104,17 @@ ExternalProject_Add(
              -DENABLE_CPACK=OFF
   )
 
+ExternalProject_Add(
+  libdeflate
+  URL https://github.com/ebiggers/libdeflate/releases/download/v1.25/libdeflate-1.25.tar.gz
+  URL_HASH SHA1=7e70557d094b54c3ee16f6c012976dc8d685b22a
+  CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+             -DLIBDEFLATE_BUILD_SHARED_LIB=OFF
+             -DLIBDEFLATE_GZIP_SUPPORT=OFF
+             -DLIBDEFLATE_BUILD_GZIP=OFF
+)
+
 ExternalProject_Add_StepDependencies(libsndfile configure flac opus)
 
 ExternalProject_Add(
@@ -117,4 +128,4 @@ ExternalProject_Add(
   )
 
 ExternalProject_Add_StepDependencies(xsystem4 configure
-  libffi libjpeg-turbo libwebp libsndfile)
+  libffi libjpeg-turbo libwebp libsndfile libdeflate)
