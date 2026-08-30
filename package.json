@@ -16,7 +16,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@irori/idbfs": "^0.4.0",
     "@picocss/pico": "^2.0.6",
     "@types/gtag.js": "^0.0.19",
     "subset-font": "^2.3.0"
