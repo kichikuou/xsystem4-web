@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See the LICENSE file for details.
 
 const dictionary_en = {
+    copy_url_failed: 'Failed to copy the URL.',
     drag_and_drop_a_folder: 'Drag and drop a folder.',
     error_occurred: 'An error occurred.',
     file_write_error: 'Failed to write file.',
@@ -14,10 +15,12 @@ const dictionary_en = {
     saves_imported: 'Save files imported.\nRestart the game?',
     system3x_game: 'This is a System3.x game. Please use Kichikuou on Web.',
     unsupported_browser: 'This browser is not supported. iOS/iPadOS 17 or later is required.',
+    url_copied: 'URL copied. Paste it into Safari.',
 };
 type Dictionary = typeof dictionary_en;
 
 const dictionary_ja: Dictionary = {
+    copy_url_failed: 'URLをコピーできませんでした。',
     drag_and_drop_a_folder: 'フォルダーをドラッグ＆ドロップしてください。',
     error_occurred: 'エラーが発生しました。',
     file_write_error: 'ファイルの書き込みに失敗しました。',
@@ -30,6 +33,7 @@ const dictionary_ja: Dictionary = {
     saves_imported: 'セーブデータを取り込みました。\nゲームを再起動しますか？',
     system3x_game: 'System3.xのゲームです。鬼畜王 on Webをご利用ください。',
     unsupported_browser: 'このブラウザでは動作しません。iOS/iPadOS 17以上が必要です。',
+    url_copied: 'URLをコピーしました。Safariに貼り付けてください。',
 };
 
 const dicts:{[language: string]: Dictionary} = {

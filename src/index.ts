@@ -3,7 +3,7 @@
 
 import { extractIconFromExe } from './icon_extractor.js';
 import { dictionary } from './strings.js';
-import { $, addToast, basename, dirname, loadGameIni, registerErrorHandlers } from './utils.js';
+import { $, addToast, basename, dirname, isAppleDevice, loadGameIni, registerErrorHandlers } from './utils.js';
 import * as zip from './zip.js';
 
 $('#file-picker').addEventListener('change', (evt: Event) => {
@@ -91,9 +91,33 @@ async function generateManifest(title: string, icon: Uint8Array<ArrayBuffer> | n
     document.head.appendChild(link);
 }
 
+// Detects iOS in-app browsers (WKWebView in apps like X), which cannot add
+// apps to the home screen. Their user agent lacks the "Safari/" token.
+function isInAppBrowser(): boolean {
+    const ua = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/.test(ua) ||
+        (isAppleDevice() && navigator.maxTouchPoints > 1);  // iPad in desktop mode
+    return isIOS && !/Safari\//.test(ua) && !window.matchMedia('(display-mode: standalone)').matches;
+}
+
+function showInAppBrowserWarning() {
+    $('#in-app-browser-warning').hidden = false;
+    ($('#file-picker') as HTMLInputElement).disabled = true;
+    $('#copy-url').addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(location.href);
+            addToast(dictionary.url_copied, 'success');
+        } catch (e) {
+            addToast(dictionary.copy_url_failed, 'error');
+        }
+    });
+}
+
 registerErrorHandlers();
 
-if (!navigator.storage || !navigator.storage.estimate) {
+if (isInAppBrowser()) {
+    showInAppBrowserWarning();
+} else if (!navigator.storage || !navigator.storage.estimate) {
     ($('#file-picker') as HTMLInputElement).disabled = true;
     addToast(dictionary.unsupported_browser, 'error');
     gtag('event', 'UnsupportedBrowser');
